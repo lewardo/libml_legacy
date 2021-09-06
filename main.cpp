@@ -4,7 +4,7 @@
 #include "libml.h"
 
 int32_t main(int32_t argc, const char * argv[]) {
-    mlpNet * mlp = new mlpNet({ 2, 3, 1 }, actfunc::tanh);
+    printf("%f\n", lossfunc::accumulate({ 0, 0, 0.5, 1 }, { 1, 0, 1, 1 }, lossfunc::MSE.f_x));
 
     return 0;
 }

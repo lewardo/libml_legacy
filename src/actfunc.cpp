@@ -2,44 +2,64 @@
 
 #include "actfunc.h"
 
+
+/*
+ *  sigmoid activation
+ */
+
 actfunc_t actfunc::sigmoid = {
-    [](float x) -> float {
-        return 1.0f / (1.0f + expf(-x));
+    [](float x) {
+        return 1.0f / (1.0f + expf(-1.0f * x));
     },
     
-    [](float x) -> float {
+    [](float x) {
         return x * (1.0f - x);
     }
 };
 
+
+/*
+ *  hyperbolic tangent activation
+ */
+
 actfunc_t actfunc::tanh = {
-    [] (float x) -> float {
+    [] (float x) {
         return tanhf(x);
     },
 
-    [] (float x) -> float {
+    [] (float x) {
         return 1.0f - x * x;
     }
 };
 
+
+/*
+ *  Rectified Linear Unit activation
+ */
+
 actfunc_t actfunc::ReLU = {
-    [] (float x) -> float {
+    [] (float x) {
         if(x > 0.0f) return x;
-        else return 0;
+        else return 0.0f;
     },
 
-    [] (float x) -> float {
-        if(x > 0.0f) return 1;
-        else return 0;
+    [] (float x) {
+        if(x > 0.0f) return 1.0f;
+        else return 0.0f;
     }
 };
 
+
+/*
+ *  Linear activation
+ */
+
 actfunc_t actfunc::linear = {
-    [] (float x) -> float {
+    [] (float x) {
         return x;
     },
     
-    [] (float x) -> float {
-        return 1;
+    [] (float x) {
+        return 1.0f;
     }
 };
