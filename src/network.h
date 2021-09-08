@@ -7,6 +7,7 @@
 #include "typedefs.h"
 #include "actfunc.h"
 #include "lossfunc.h"
+#include "params.h"
 
 /* 
  * Network abstract class that will be inherited by all the network objects

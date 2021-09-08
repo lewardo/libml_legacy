@@ -8,6 +8,7 @@
 #include "typedefs.h"
 #include "actfunc.h"
 #include "lossfunc.h"
+#include "params.h"
 #include "utils.h"
 
 class mlpNet : public Network<vfloat, vfloat> {
