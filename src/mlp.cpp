@@ -2,15 +2,15 @@
 #include <cstdio>
 #include <vector>
 
+#include "neural.h"
 #include "network.h"
-#include "typedefs.h"
 #include "actfunc.h"
 #include "lossfunc.h"
 
 #include "mlp.h"
 
 
-mlpNet::mlpNet(std::vector<size_t> npl, actfunc_t af) : Network() {
+Neural::mlp::mlp(std::vector<size_t> npl, actfunc_t af) : Net() {
     size_t size = npl.size();
 
     for(size_t n = 0; n < size; ++n) {
@@ -22,50 +22,50 @@ mlpNet::mlpNet(std::vector<size_t> npl, actfunc_t af) : Network() {
     initialised = true;
 };
 
-mlpNet::mlpNet(mlp_param_t params): mlpNet(params.npl, params.af)  {
+Neural::mlp::mlp(mlp_param_t params): mlp(params.npl, params.af)  {
     // already initialised
 };
 
-mlpNet::~mlpNet() {
+Neural::mlp::~mlp() {
     
 }
 
-float mlpNet::regress(const mfloat &data, const mfloat &target, metadata_t params) {
+float Neural::mlp::regress(const mfloat &data, const mfloat &target, metadata_t params) {
     return utils::random();
 };
 
-int32_t mlpNet::predict(const mfloat &data, mfloat &output) {
+int32_t Neural::mlp::predict(const mfloat &data, mfloat &output) {
     return 0;
 };
 
-int32_t mlpNet::load(const std::string src) {
+int32_t Neural::mlp::load(const std::string src) {
     return 0;
 };
 
-int32_t mlpNet::save(const std::string src) {
+int32_t Neural::mlp::save(const std::string src) {
     return 0;
 };
 
-int32_t mlpNet::push_back(uint32_t n, actfunc_t af) {
+int32_t Neural::mlp::push_back(uint32_t n, actfunc_t af) {
     return 0;
 };
 
-int32_t mlpNet::pop_back() {
+int32_t Neural::mlp::pop_back() {
     return 0;
 };
 
-int32_t mlpNet::insert(uint32_t idx, uint32_t n, actfunc_t af) {
+int32_t Neural::mlp::insert(uint32_t idx, uint32_t n, actfunc_t af) {
     return 0;
 };
 
-int32_t mlpNet::erase(uint32_t idx) {
+int32_t Neural::mlp::erase(uint32_t idx) {
     return 0;
 };   
 
-float mlpNet::Layer::backtrack(Layer &prev, Weights &weights) {
+float Neural::mlp::Layer::backtrack(Layer &prev, Weights &weights) {
     return 0;
 };
 
-float mlpNet::Layer::propagate(Layer &next, Weights &weights) {
+float Neural::mlp::Layer::propagate(Layer &next, Weights &weights) {
     return 0;
 };

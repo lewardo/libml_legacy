@@ -4,24 +4,24 @@
 #include <cstdio>
 #include <vector>
 
+#include "neural.h"
 #include "network.h"
-#include "typedefs.h"
 #include "actfunc.h"
 #include "lossfunc.h"
 #include "params.h"
 #include "utils.h"
 
-class mlpNet : public Network<vfloat, vfloat> {
+class Neural::mlp : public Neural::Net<vfloat, vfloat> {
     public:
 
         /*
          *  Constructor with the mlp parameter object and optionally with the variables as arguments
          */
 
-        mlpNet(std::vector<size_t> npl, actfunc_t af);
-        mlpNet(mlp_param_t params);
+        mlp(std::vector<size_t> npl, actfunc_t af);
+        mlp(mlp_param_t params);
 
-        ~mlpNet();
+        ~mlp();
 
 
         /* 

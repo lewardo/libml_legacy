@@ -1,6 +1,5 @@
 #pragma once
 
-#include "typedefs.h"
 #include "actfunc.h"
 #include "lossfunc.h"
 
