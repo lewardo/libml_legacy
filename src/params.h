@@ -6,7 +6,7 @@
 using metadata_t = struct {
     float lr, mo;
     uint32_t batch;
-    lossfunc_t lf;
+    lossfunc::Lossfunc lf;
 
     struct {
         bool mode; 
@@ -19,5 +19,5 @@ using metadata_t = struct {
 
 using mlp_param_t = struct {
     std::vector<size_t> npl;
-    actfunc_t af;
+    actfunc::Actfunc af;
 };

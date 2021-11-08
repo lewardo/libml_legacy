@@ -1,12 +1,6 @@
 #pragma once
 
-/*
- *  actfunc type, a struct consisting of two functions, the activation function itself and its derivative
- */
-
-using actfunc_t = struct {
-    float (* f_x)(float), (* df_dx)(float);
-};
+#include <functional>
 
 
 /*
@@ -15,29 +9,56 @@ using actfunc_t = struct {
 
 namespace actfunc {
     /*
+     *  using declarations
+     */  
+
+    using ActType = std::function<float (float)>;
+
+
+    /*
+     *  actfunc type, a struct consisting of two functions, the activation function itself and its derivative
+     */
+
+    struct Actfunc {
+        /*
+         *  activation function itself
+         */
+
+        ActType f_x;
+
+
+        /*
+         *  activation of the loss function
+         */
+
+        ActType df_dx;
+    };
+
+
+    /*
      *  sigmoid activation
      */
 
-    extern actfunc_t sigmoid;
+    extern Actfunc Sigmoid;
 
 
     /*
      *  hyperbolic tangent activation
      */
 
-    extern actfunc_t tanh;
+    extern Actfunc Tanh;
 
 
     /*
      *  Rectified Linear Unit activation
      */
 
-    extern actfunc_t ReLU;
+    extern Actfunc ReLU;
     
 
     /*
      *  Linear activation
      */
 
-    extern actfunc_t linear;
+    extern Actfunc Linear;
 };
