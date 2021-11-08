@@ -28,13 +28,15 @@ float lossfunc::accumulate(vfloat a, vfloat b, std::function<float (float, float
  *  Mean Squared Error (L2)
  */
 
-float lossfunc::MSE::f_x(float x, float t) {
-    float d = t - x;
-    return 0.5f * d * d;
-};
+lossfunc::Lossfunc lossfunc::MeanSquared = {
+    [](float x, float t) -> float {
+        float d = t - x;
+        return 0.5f * d * d;
+    },
 
-float lossfunc::MSE::df_dx(float x, float t) {
-    return x - t;
+    [](float x, float t) -> float {
+        return x - t;
+    },
 };
 
 
@@ -42,15 +44,17 @@ float lossfunc::MSE::df_dx(float x, float t) {
  *  Mean Absolute Error (L1)
  */
 
-float lossfunc::MAE::f_x(float x, float t) {
-    return fabsf(t - x);
-};
+lossfunc::Lossfunc lossfunc::MeanAbsolute = {
+    [](float x, float t) -> float {
+        return fabsf(t - x);
+    },
 
-float lossfunc::MAE::df_dx(float x, float t) {
-    if(x < t) return -1.0f;
-    else if(x > t) return 1.0f;
+    [](float x, float t) -> float {
+        if(x < t) return -1.0f;
+        else if(x > t) return 1.0f;
 
-    return 0.0f;
+        return 0.0f;
+    },
 };
 
 
@@ -58,14 +62,16 @@ float lossfunc::MAE::df_dx(float x, float t) {
  *  Cross Entropy or Log Loss Error, target consists of only 0s or 1s, used for classification problems
  */
 
-float lossfunc::XEE::f_x(float x, float t) {
-    if(t == 1.0f) 
-        return -1.0f * logf(x);
-    return -1.0f * logf(1.0f - x);
-};
+lossfunc::Lossfunc lossfunc::CrossEntropy = {
+    [](float x, float t) -> float {
+        if(t == 1.0f) 
+            return -1.0f * logf(x);
+        return -1.0f * logf(1.0f - x);
+    },
 
-float lossfunc::XEE::df_dx(float x, float t) {
-    if(t == 1.0f) 
-        return -1.0f / x;
-    return -1.0f / (1.0f - t);
+    [](float x, float t) -> float {
+        if(t == 1.0f) 
+            return -1.0f / x;
+        return -1.0f / (1.0f - t);
+    },
 };
