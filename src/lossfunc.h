@@ -1,16 +1,9 @@
 #pragma once
 
-#include <numeric>
+#include <vector>
+#include <functional>
 
-#include "typedefs.h"
-
-/*
- *  lossfunc type, a struct consisting of two functions, the loss function itself and its derivative
- */
-
-using lossfunc_t = struct {
-    float (* f_x)(float, float), (* df_dx)(float, float);
-};
+#include "neural.h"
 
 
 /*
@@ -19,29 +12,78 @@ using lossfunc_t = struct {
 
 namespace lossfunc {
     /*
+     *  using declaration to link define float vector
+     */  
+
+    using vfloat = std::vector<float>;
+
+
+    /*
      *  Accumulator function to simplify error calculation
      */
 
-    float accumulate(vfloat, vfloat, float (*)(float, float));
+    float accumulate(vfloat, vfloat, std::function<float (float, float)>);
 
 
     /*
      *  Mean Squared Error (L2)
      */
 
-    extern lossfunc_t MSE;
+    class MSE {
+        public:
+            /*
+             *  loss function itself
+             */
+
+            static float f_x(float, float);
+
+
+            /*
+             *  derivative of the loss function
+             */
+
+            static float df_dx(float, float);
+    };
 
 
     /*
      *  Mean Absolute Error (L1)
      */
 
-    extern lossfunc_t MAE;
+    class MAE {
+        public:
+            /*
+             *  loss function itself
+             */
+
+            static float f_x(float, float);
+
+
+            /*
+             *  derivative of the loss function
+             */
+
+            static float df_dx(float, float);
+    };
 
 
     /*
      *  Cross Entropy or Log Loss Error
      */
 
-    extern lossfunc_t XEE;
+    class XEE {
+        public:
+            /*
+             *  loss function itself
+             */
+
+            static float f_x(float, float);
+
+
+            /*
+             *  derivative of the loss function
+             */
+
+            static float df_dx(float, float);
+    };
 };

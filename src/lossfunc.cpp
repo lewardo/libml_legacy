@@ -1,14 +1,16 @@
 #include <cstdlib>
+#include <vector>
+#include <functional>
 #include <numeric>
 
-#include "typedefs.h"
 #include "lossfunc.h"
+
 
 /*
  *  Accumulator function to simplify error calculation
  */
 
-float lossfunc::accumulate(vfloat a, vfloat b, float (* f)(float, float)) {
+float lossfunc::accumulate(vfloat a, vfloat b, std::function<float (float, float)> f) {
     vfloat merged;
 
     // return if mismatched sizes
@@ -21,53 +23,49 @@ float lossfunc::accumulate(vfloat a, vfloat b, float (* f)(float, float)) {
     return std::accumulate(merged.begin(), merged.end(), 0.0f);
 };
 
+
 /*
  *  Mean Squared Error (L2)
  */
 
-lossfunc_t lossfunc::MSE = {
-    [](float x, float t) {
-        float d = t - x;
-        return 0.5f * d * d;
-    },
-
-    [](float x, float t) {
-        return x - t;
-    }
+float lossfunc::MSE::f_x(float x, float t) {
+    float d = t - x;
+    return 0.5f * d * d;
 };
+
+float lossfunc::MSE::df_dx(float x, float t) {
+    return x - t;
+};
+
 
 /*
  *  Mean Absolute Error (L1)
  */
 
-lossfunc_t lossfunc::MAE = {
-    [](float x, float t) {
-        return fabsf(t - x);
-    },
+float lossfunc::MAE::f_x(float x, float t) {
+    return fabsf(t - x);
+};
 
-    [](float x, float t) {
-        if(x < t) return -1.0f;
-        else if(x > t) return 1.0f;
+float lossfunc::MAE::df_dx(float x, float t) {
+    if(x < t) return -1.0f;
+    else if(x > t) return 1.0f;
 
-        return 0.0f;
-    }
+    return 0.0f;
 };
 
 
 /*
- *  Cross Entropy or Log Loss Error, out consists of only 0s or 1s, used for classification problems
+ *  Cross Entropy or Log Loss Error, target consists of only 0s or 1s, used for classification problems
  */
 
-lossfunc_t lossfunc::XEE = {
-    [](float x, float t) {
-        if(t == 1.0f) return -1.0f * logf(x);
+float lossfunc::XEE::f_x(float x, float t) {
+    if(t == 1.0f) 
+        return -1.0f * logf(x);
+    return -1.0f * logf(1.0f - x);
+};
 
-        return -1.0f * logf(1.0f - x);
-    },
-
-    [](float x, float t) {
-        if(t == 1.0f) return -1.0f / x;
-
-        return -1.0f / (1.0f - t);
-    }
+float lossfunc::XEE::df_dx(float x, float t) {
+    if(t == 1.0f) 
+        return -1.0f / x;
+    return -1.0f / (1.0f - t);
 };
