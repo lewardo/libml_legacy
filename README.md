@@ -1,6 +1,5 @@
 # libml
 ## a more fully fledged machine learning library for the c programming language
----
 ### current implementations:
 + file structure
 + Network abstact class
@@ -28,4 +27,11 @@
 └── README.md   # this file :)
 ```
 ---
+```bash
+# compilation
+% mkdir build
+% g++ -o build/main -std=c++17 -stdlib=libc++ -I . *.cpp src/*.cpp
+# run it!
+% build/main
+```
 </> with ❤️ by lewardo 2021
