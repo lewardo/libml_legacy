@@ -18,7 +18,7 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  Constructor with the mlp parameter object and optionally with the variables as arguments
          */
 
-        mlp(std::vector<size_t> npl, actfunc_t af);
+        mlp(std::vector<size_t> npl, actfunc::type af);
         mlp(mlp_param_t params);
 
         ~mlp();
@@ -46,9 +46,9 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          * used for construction of structure as changing topology screws with parameters previously trained 
          */
 
-        int32_t push_back(uint32_t n, actfunc_t af);
+        int32_t push_back(uint32_t n, actfunc::type af);
         int32_t pop_back();
-        int32_t insert(uint32_t idx, uint32_t n, actfunc_t af);
+        int32_t insert(uint32_t idx, uint32_t n, actfunc::type af);
         int32_t erase(uint32_t idx);
     
     private:
@@ -61,7 +61,7 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
         struct __attribute__((packed)) Biases {
             vfloat b;
 
-            Biases(size_t n) : b(n, 0.0f) {
+            Biases(size_t n) :b(n, 0.0f) {
                 std::generate(b.begin(), b.end(), []() {
                     return utils::random();
                 });
@@ -124,9 +124,13 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
             size_t size;
             Neurons neurons;
             Biases biases;
-            actfunc_t activation;
+            actfunc::type activation;
 
-            Layer(size_t n, actfunc_t af) : size(n), neurons(n), biases(n), activation(af) {
+            Layer(size_t n, actfunc::type af) 
+               :size(n), 
+                neurons(n), 
+                biases(n), 
+                activation(af) {
                 // all already initialised
             };
 

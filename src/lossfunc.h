@@ -16,26 +16,26 @@ namespace lossfunc {
      */  
 
     using vfloat = std::vector<float>;
-    using LossType = std::function<float (float, float)>;
+    using lf = std::function<float (float, float)>;
 
 
     /*
      *  inheritable class to be able to pass all lossfuncs as a single pointer
      */
 
-    struct Lossfunc {
+    struct type {
         /*
          *  loss function itself
          */
 
-        LossType f_x;
+        lf f_x;
 
 
         /*
          *  derivative of the loss function
          */
 
-        LossType df_dx;
+        lf df_dx;
     };
 
 
@@ -43,26 +43,26 @@ namespace lossfunc {
      *  Accumulator function to simplify error calculation
      */
 
-    float accumulate(vfloat, vfloat, LossType);
+    float accumulate(vfloat, vfloat, lf);
 
 
     /*
      *  Mean Squared Error (L2)
      */
 
-    extern Lossfunc MeanSquared;
+    extern ::lossfunc::type MeanSquared;
 
 
     /*
      *  Mean Absolute Error (L1)
      */
 
-    extern Lossfunc MeanAbsolute;
+    extern ::lossfunc::type MeanAbsolute;
 
 
     /*
      *  Cross Entropy or Log Loss Error
      */
 
-    extern Lossfunc CrossEntropy;
+    extern ::lossfunc::type CrossEntropy;
 };

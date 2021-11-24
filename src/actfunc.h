@@ -12,26 +12,26 @@ namespace actfunc {
      *  using declarations
      */  
 
-    using ActType = std::function<float (float)>;
+    using af = std::function<float (float)>;
 
 
     /*
      *  actfunc type, a struct consisting of two functions, the activation function itself and its derivative
      */
 
-    struct Actfunc {
+    struct type {
         /*
          *  activation function itself
          */
 
-        ActType f_x;
+        af f_x;
 
 
         /*
          *  activation of the loss function
          */
 
-        ActType df_dx;
+        af df_dx;
     };
 
 
@@ -39,26 +39,26 @@ namespace actfunc {
      *  sigmoid activation
      */
 
-    extern Actfunc Sigmoid;
+    extern ::actfunc::type Sigmoid;
 
 
     /*
      *  hyperbolic tangent activation
      */
 
-    extern Actfunc Tanh;
+    extern ::actfunc::type Tanh;
 
 
     /*
      *  Rectified Linear Unit activation
      */
 
-    extern Actfunc ReLU;
+    extern ::actfunc::type ReLU;
     
 
     /*
      *  Linear activation
      */
 
-    extern Actfunc Linear;
+    extern ::actfunc::type Linear;
 };

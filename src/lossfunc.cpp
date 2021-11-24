@@ -10,7 +10,7 @@
  *  Accumulator function to simplify error calculation
  */
 
-float lossfunc::accumulate(vfloat a, vfloat b, std::function<float (float, float)> f) {
+float lossfunc::accumulate(vfloat a, vfloat b, lossfunc::lf f) {
     vfloat merged;
 
     // return if mismatched sizes
@@ -28,7 +28,7 @@ float lossfunc::accumulate(vfloat a, vfloat b, std::function<float (float, float
  *  Mean Squared Error (L2)
  */
 
-lossfunc::Lossfunc lossfunc::MeanSquared = {
+lossfunc::type lossfunc::MeanSquared = {
     [](float x, float t) -> float {
         float d = t - x;
         return 0.5f * d * d;
@@ -44,7 +44,7 @@ lossfunc::Lossfunc lossfunc::MeanSquared = {
  *  Mean Absolute Error (L1)
  */
 
-lossfunc::Lossfunc lossfunc::MeanAbsolute = {
+lossfunc::type lossfunc::MeanAbsolute = {
     [](float x, float t) -> float {
         return fabsf(t - x);
     },
@@ -62,7 +62,7 @@ lossfunc::Lossfunc lossfunc::MeanAbsolute = {
  *  Cross Entropy or Log Loss Error, target consists of only 0s or 1s, used for classification problems
  */
 
-lossfunc::Lossfunc lossfunc::CrossEntropy = {
+lossfunc::type lossfunc::CrossEntropy = {
     [](float x, float t) -> float {
         if(t == 1.0f) 
             return -1.0f * logf(x);

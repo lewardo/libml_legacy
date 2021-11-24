@@ -10,7 +10,7 @@
 #include "mlp.h"
 
 
-Neural::mlp::mlp(std::vector<size_t> npl, actfunc_t af) : Net() {
+Neural::mlp::mlp(std::vector<size_t> npl, actfunc::type af) : Net() {
     size_t size = npl.size();
 
     for(size_t n = 0; n < size; ++n) {
@@ -46,7 +46,7 @@ int32_t Neural::mlp::save(const std::string src) {
     return 0;
 };
 
-int32_t Neural::mlp::push_back(uint32_t n, actfunc_t af) {
+int32_t Neural::mlp::push_back(uint32_t n, actfunc::type af) {
     return 0;
 };
 
@@ -54,7 +54,7 @@ int32_t Neural::mlp::pop_back() {
     return 0;
 };
 
-int32_t Neural::mlp::insert(uint32_t idx, uint32_t n, actfunc_t af) {
+int32_t Neural::mlp::insert(uint32_t idx, uint32_t n, actfunc::type af) {
     return 0;
 };
 

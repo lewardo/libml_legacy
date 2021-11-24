@@ -7,7 +7,7 @@
  *  sigmoid activation
  */
 
-actfunc::Actfunc actfunc::Sigmoid = {
+actfunc::type actfunc::Sigmoid = {
     [](float x) -> float {
         return 1.0f / (1.0f + expf(-1.0f * x));
     },
@@ -22,7 +22,7 @@ actfunc::Actfunc actfunc::Sigmoid = {
  *  hyperbolic tangent activation
  */
 
-actfunc::Actfunc actfunc::Tanh = {
+actfunc::type actfunc::Tanh = {
     [] (float x) -> float {
         return tanhf(x);
     },
@@ -37,7 +37,7 @@ actfunc::Actfunc actfunc::Tanh = {
  *  Rectified Linear Unit activation
  */
 
-actfunc::Actfunc actfunc::ReLU = {
+actfunc::type actfunc::ReLU = {
     [] (float x) -> float {
         if(x > 0.0f) return x;
         else return 0.0f;
@@ -54,7 +54,7 @@ actfunc::Actfunc actfunc::ReLU = {
  *  Linear activation
  */
 
-actfunc::Actfunc actfunc::Linear = {
+actfunc::type actfunc::Linear = {
     [] (float x) -> float {
         return x;
     },
