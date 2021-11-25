@@ -1,34 +1,46 @@
 #pragma once
 
+#include <cstdbool>
 #include <vector>
+#include <initializer_list>
+#include <variant>
 
-using datatype_t = enum {
-    NONE = 0,
-    VECTOR,
-    MATRIX,
-    VSERIES,
-};
+namespace Corpus {
+    using vfloat = std::vector<float>;
+    using mfloat = std::vector<vfloat>;
 
-using corpusinfo_t = struct {
-    std::vector<size_t> dim;
-    datatype_t type;
-};
+    using variant = std::variant<vfloat, mfloat>;
 
-template <typename Datatype>
-class Corpus {
-    private:
-        std::vector<Datatype> data;
-        corpusinfo_t spec;
+    class Base {
+        public:
+            virtual ~Base() = default;
 
-    public:
-        Corpus(std::vector<Datatype> &initialisor);
+            virtual variant operator [](const int& idx) = 0;
 
-        Datatype operator [](int &idx) {
-            return data[idx];
+        protected:
+            Base(std::string, bool);
+            Base(std::initializer_list<variant>, bool);
+
+            std::vector<variant> data;
+    };
+
+    namespace Icor {
+        class type : public Base {
+            public:
+                type(std::string);
+                type(std::initializer_list<variant>);
+
+                variant operator [](const int&) override;
         };
+    };
 
-        std::vector<Datatype> operator ()() {
-            return data;
-        }
-};
+    namespace Tcor {
+        class type : public Base {
+            public:
+                type(std::string);
+                type(std::initializer_list<variant>);
 
+                variant operator [](const int&) override;
+        };
+    };
+}
