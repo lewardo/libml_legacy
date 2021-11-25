@@ -26,10 +26,6 @@ Neural::mlp::mlp(mlp_param_t params): mlp(params.npl, params.af)  {
     // already initialised
 };
 
-Neural::mlp::~mlp() {
-    
-}
-
 float Neural::mlp::regress(const mfloat &data, const mfloat &target, metadata_t params) {
     return utils::random();
 };

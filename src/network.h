@@ -25,7 +25,7 @@ class Neural::Net {
          *  set to default as there is nothing to deinit
          */
 
-        virtual ~Net() {};
+        virtual ~Net() = default;
 
 
         /* 

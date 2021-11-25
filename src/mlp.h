@@ -21,7 +21,7 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
         mlp(std::vector<size_t> npl, actfunc::type af);
         mlp(mlp_param_t params);
 
-        ~mlp();
+        ~mlp() = default;
 
 
         /* 
