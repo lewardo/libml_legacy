@@ -24,7 +24,7 @@ namespace Corpus {
             std::vector<variant> data;
     };
 
-    namespace Icor {
+    namespace Unicor {
         class type : public Base {
             public:
                 type(std::string);
@@ -34,7 +34,7 @@ namespace Corpus {
         };
     };
 
-    namespace Tcor {
+    namespace Bicor {
         class type : public Base {
             public:
                 type(std::string);
