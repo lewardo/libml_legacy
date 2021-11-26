@@ -1,10 +1,10 @@
 #pragma once
 
-#include "src/network.h"
-#include "src/corpus.h"
+#include "network.h"
+#include "corpus.h"
 
-#include "src/actfunc.h"
-#include "src/lossfunc.h"
+#include "actfunc.h"
+#include "lossfunc.h"
 
-#include "src/mlp.h"
+#include "mlp.h"
 

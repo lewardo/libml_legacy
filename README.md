@@ -29,9 +29,13 @@
 ---
 ```bash
 # compilation
-% mkdir build
-% g++ -o build/main -std=c++17 -stdlib=libc++ -I . *.cpp src/*.cpp
-# run it!
-% build/main
+% make build
+# running program
+% make run
+```
+or
+```bash
+# compile and run
+% make
 ```
 </> with ❤️ by lewardo 2021
