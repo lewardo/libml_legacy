@@ -2,19 +2,40 @@ CPP		:= g++
 
 SRC		:= src
 BIN		:= build
+EXE		:= $(BIN)/main
+OBJ		:= $(BIN)/obj
 
-INCLUDE	:= $(shell find $(SRC) -type d | xargs printf '\-I %s ')
 SRCS	:= $(shell find . -name '*.cpp')
+OBJS	:= $(shell find . -name '*.cpp' | xargs -L 1 basename | sed 's/cpp$$/o/' | awk '{ print "$(OBJ)/" $$0 }')
+INCLUDE	:= $(shell find $(SRC) -type d | xargs printf '\-I%s ' | xargs)
 
-CXXFLAGS += -std=c++17 -stdlib=libc++ $(INCLUDE) -Wall -O3
+
+CXXFLAGS += -std=c++17 -pedantic -Wall -O3 $(INCLUDE)
+LDFLAGS += -lm
 
 
-run: build
-	@build/main
+.PHONY: all clean cosm
 
-build: $(SRCS)
-	mkdir -p build
-	$(CPP) $^ $(CXXFLAGS) -o $(BIN)/$@
+all: $(EXE)
+	@echo "=== running ==="
+	@$<
+
+$(EXE): $(OBJS) | $(BIN) $(OBJ)
+	@echo "=== linking $@ ==="
+	$(CPP) $(LDFLAGS) $^ -o $@
+
+.SECONDEXPANSION:
+source = $(shell find . -type f | grep -m 1 $*.cpp)
+
+$(OBJ)/%.o: $${source} | $(OBJ) cosm
+	@$(CPP) -c $< $(CXXFLAGS) -o $@
+
+$(BIN) $(OBJ):
+	@mkdir -p $@
 
 clean:
-	rm -rf $(BIN)
+	@echo "=== cleaning ==="
+	@rm -rf $(BIN)
+
+cosm:
+	@echo "=== building ==="
