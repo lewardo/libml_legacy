@@ -9,33 +9,37 @@ SRCS	:= $(shell find . -name '*.cpp')
 OBJS	:= $(shell find . -name '*.cpp' | xargs -L 1 basename | sed 's/cpp$$/o/' | awk '{ print "$(OBJ)/" $$0 }')
 INCLUDE	:= $(shell find $(SRC) -type d | xargs printf '\-I%s ' | xargs)
 
-
 CXXFLAGS += -std=c++17 -pedantic -Wall -O3 $(INCLUDE)
 LDFLAGS += -lm
 
+source 	= $(shell find . -type f | grep -m 1 $*.cpp)
+done 	:= 0
+c 		:= \033[2K\r
 
-.PHONY: all clean cosm
 
-all: $(EXE)
-	@echo "=== running ==="
-	@$<
+.PHONY: all run build clean
 
-$(EXE): $(OBJS) | $(BIN) $(OBJ)
-	@echo "=== linking $@ ==="
-	$(CPP) $(LDFLAGS) $^ -o $@
+all run: build
+	@ $(EXE)
+
+build: $(EXE)
+
+$(EXE): $(OBJS) | $(OBJ)
+	@ printf "$clinking $@..."
+	@ $(CPP) $(LDFLAGS) $^ -o $@
+	@ printf "$c"
 
 .SECONDEXPANSION:
-source = $(shell find . -type f | grep -m 1 $*.cpp)
 
-$(OBJ)/%.o: $${source} | $(OBJ) cosm
-	@$(CPP) -c $< $(CXXFLAGS) -o $@
+$(OBJ)/%.o: $${source} | $(OBJ)
+	@ printf "$c[$(done)/$(words $(OBJS))] building $@..."
+	@ $(eval done = $(shell echo $$(($(done) + 1))))
 
-$(BIN) $(OBJ):
-	@mkdir -p $@
+	@ $(CPP) -c $< $(CXXFLAGS) -o $@
+
+$(OBJ):
+	@ mkdir -p $@
 
 clean:
-	@echo "=== cleaning ==="
-	@rm -rf $(BIN)
-
-cosm:
-	@echo "=== building ==="
+	@ printf "$ccleaning..."
+	@ rm -rf $(BIN)
