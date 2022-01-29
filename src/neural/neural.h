@@ -2,15 +2,16 @@
 
 #include <vector>
 
-namespace Neural {
-    using vfloat = std::vector<float>;
-    using mfloat = std::vector<vfloat>;
+#include "types.h"
 
-    template <typename inType, typename outType> 
-    class Net;
+namespace Neural {
+    using namespace mltypes;
+
+    template <typename it, typename ot> 
+    class net;
 
     class mlp;
 };
 
-template <typename inType, typename outType>
-using Network = Neural::Net<inType, outType>;
+template <typename it, typename ot>
+using Network = Neural::net<it, ot>;

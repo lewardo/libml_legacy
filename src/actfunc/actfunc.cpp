@@ -7,12 +7,12 @@
  *  sigmoid activation
  */
 
-actfunc::type actfunc::Sigmoid = {
-    [](float x) -> float {
+actfunc::type actfunc::sigmoid = {
+    [](f32 x) -> f32 {
         return 1.0f / (1.0f + expf(-1.0f * x));
     },
     
-    [](float x) -> float {
+    [](f32 x) -> f32 {
         return x * (1.0f - x);
     }
 };
@@ -22,12 +22,12 @@ actfunc::type actfunc::Sigmoid = {
  *  hyperbolic tangent activation
  */
 
-actfunc::type actfunc::Tanh = {
-    [] (float x) -> float {
+actfunc::type actfunc::tanh = {
+    [] (f32 x) -> f32 {
         return tanhf(x);
     },
 
-    [] (float x) -> float {
+    [] (f32 x) -> f32 {
         return 1.0f - x * x;
     }
 };
@@ -37,13 +37,13 @@ actfunc::type actfunc::Tanh = {
  *  Rectified Linear Unit activation
  */
 
-actfunc::type actfunc::ReLU = {
-    [] (float x) -> float {
+actfunc::type actfunc::relu = {
+    [] (f32 x) -> f32 {
         if(x > 0.0f) return x;
         else return 0.0f;
     },
 
-    [] (float x) -> float {
+    [] (f32 x) -> f32 {
         if(x > 0.0f) return 1.0f;
         else return 0.0f;
     }
@@ -54,12 +54,12 @@ actfunc::type actfunc::ReLU = {
  *  Linear activation
  */
 
-actfunc::type actfunc::Linear = {
-    [] (float x) -> float {
+actfunc::type actfunc::linear = {
+    [] (f32 x) -> f32 {
         return x;
     },
     
-    [] (float x) -> float {
+    [] (f32 x) -> f32 {
         return 1.0f;
     }
 };

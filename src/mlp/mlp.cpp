@@ -10,13 +10,13 @@
 #include "mlp.h"
 
 
-Neural::mlp::mlp(std::vector<size_t> npl, actfunc::type af) : Net() {
+Neural::mlp::mlp(std::vector<size_t> npl, actfunc::type af) : net() {
     size_t size = npl.size();
 
     for(size_t n = 0; n < size; ++n) {
-        Layer next = Layer(npl[n], af);
+        layer next = layer(npl[n], af);
 
-        layers.push_back(next);
+        _layers.push_back(next);
     }
 
     initialised = true;
@@ -26,42 +26,42 @@ Neural::mlp::mlp(mlp_param_t params): mlp(params.npl, params.af)  {
     // already initialised
 };
 
-float Neural::mlp::regress(const mfloat &data, const mfloat &target, metadata_t params) {
+f32 Neural::mlp::regress(const mf32 &data, const mf32 &target, metadata_t params) {
     return utils::random();
 };
 
-int32_t Neural::mlp::predict(const mfloat &data, mfloat &output) {
+i32 Neural::mlp::predict(const mf32 &data, mf32 &output) {
     return 0;
 };
 
-int32_t Neural::mlp::load(const std::string src) {
+i32 Neural::mlp::load(const std::string src) {
     return 0;
 };
 
-int32_t Neural::mlp::save(const std::string src) {
+i32 Neural::mlp::save(const std::string src) {
     return 0;
 };
 
-int32_t Neural::mlp::push_back(uint32_t n, actfunc::type af) {
+i32 Neural::mlp::push_back(u32 n, actfunc::type af) {
     return 0;
 };
 
-int32_t Neural::mlp::pop_back() {
+i32 Neural::mlp::pop_back() {
     return 0;
 };
 
-int32_t Neural::mlp::insert(uint32_t idx, uint32_t n, actfunc::type af) {
+i32 Neural::mlp::insert(u32 idx, u32 n, actfunc::type af) {
     return 0;
 };
 
-int32_t Neural::mlp::erase(uint32_t idx) {
+i32 Neural::mlp::erase(u32 idx) {
     return 0;
 };   
 
-float Neural::mlp::Layer::backtrack(Layer &prev, Weights &weights) {
+f32 Neural::mlp::layer::backtrack(layer &prev, weights &weights) {
     return 0;
 };
 
-float Neural::mlp::Layer::propagate(Layer &next, Weights &weights) {
+f32 Neural::mlp::layer::propagate(layer &next, weights &weights) {
     return 0;
 };

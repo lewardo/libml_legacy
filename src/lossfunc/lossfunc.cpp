@@ -10,8 +10,8 @@
  *  Accumulator function to simplify error calculation
  */
 
-float lossfunc::accumulate(vfloat a, vfloat b, lossfunc::lf f) {
-    vfloat merged;
+lossfunc::f32 lossfunc::accumulate(vf32 a, vf32 b, lossfunc::lf f) {
+    vf32 merged;
 
     // return if mismatched sizes
     if(a.size() != b.size()) return -1.0f;
@@ -28,13 +28,13 @@ float lossfunc::accumulate(vfloat a, vfloat b, lossfunc::lf f) {
  *  Mean Squared Error (L2)
  */
 
-lossfunc::type lossfunc::MeanSquared = {
-    [](float x, float t) -> float {
-        float d = t - x;
+lossfunc::type lossfunc::mse = {
+    [](f32 x, f32 t) -> f32 {
+        f32 d = t - x;
         return 0.5f * d * d;
     },
 
-    [](float x, float t) -> float {
+    [](f32 x, f32 t) -> f32 {
         return x - t;
     },
 };
@@ -44,12 +44,12 @@ lossfunc::type lossfunc::MeanSquared = {
  *  Mean Absolute Error (L1)
  */
 
-lossfunc::type lossfunc::MeanAbsolute = {
-    [](float x, float t) -> float {
+lossfunc::type lossfunc::mae = {
+    [](f32 x, f32 t) -> f32 {
         return fabsf(t - x);
     },
 
-    [](float x, float t) -> float {
+    [](f32 x, f32 t) -> f32 {
         if(x < t) return -1.0f;
         else if(x > t) return 1.0f;
 
@@ -62,14 +62,14 @@ lossfunc::type lossfunc::MeanAbsolute = {
  *  Cross Entropy or Log Loss Error, target consists of only 0s or 1s, used for classification problems
  */
 
-lossfunc::type lossfunc::CrossEntropy = {
-    [](float x, float t) -> float {
+lossfunc::type lossfunc::xee = {
+    [](f32 x, f32 t) -> f32 {
         if(t == 1.0f) 
             return -1.0f * logf(x);
         return -1.0f * logf(1.0f - x);
     },
 
-    [](float x, float t) -> float {
+    [](f32 x, f32 t) -> f32 {
         if(t == 1.0f) 
             return -1.0f / x;
         return -1.0f / (1.0f - t);

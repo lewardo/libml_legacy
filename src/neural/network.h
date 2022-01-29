@@ -16,8 +16,8 @@
  * 
  */
 
-template <typename inType, typename outType>
-class Neural::Net {
+template <typename it, typename ot>
+class Neural::net {
     public:
 
         /*
@@ -25,7 +25,7 @@ class Neural::Net {
          *  set to default as there is nothing to deinit
          */
 
-        virtual ~Net() = default;
+        virtual ~net() = default;
 
 
         /* 
@@ -35,8 +35,8 @@ class Neural::Net {
          *      > predicting will return an error code, usually 0 for success and >0 for an error
          */
 
-        virtual float regress(const std::vector<inType> &data, const std::vector<outType> &target, metadata_t params) = 0;
-        virtual int32_t predict(const std::vector<inType> &data, std::vector<outType> &output) = 0;
+        virtual f32 regress(const std::vector<it> &data, const std::vector<ot> &target, metadata_t params) = 0;
+        virtual i32 predict(const std::vector<it> &data, std::vector<ot> &output) = 0;
 
 
         /* 
@@ -44,8 +44,8 @@ class Neural::Net {
          *  enables later saving and loading from drive
          */
         
-        virtual int32_t load(const std::string src) = 0;
-        virtual int32_t save(const std::string src) = 0;
+        virtual i32 load(const std::string src) = 0;
+        virtual i32 save(const std::string src) = 0;
 
     protected:
         /* variable to tell whether it has been initialised */

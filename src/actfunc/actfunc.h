@@ -2,6 +2,8 @@
 
 #include <functional>
 
+#include "types.h"
+
 
 /*
  *  actfunc namespace, to clarify useage
@@ -12,7 +14,8 @@ namespace actfunc {
      *  using declarations
      */  
 
-    using af = std::function<float (float)>;
+    using namespace mltypes;
+    using af = std::function<f32 (f32)>;
 
 
     /*
@@ -39,26 +42,26 @@ namespace actfunc {
      *  sigmoid activation
      */
 
-    extern ::actfunc::type Sigmoid;
+    extern ::actfunc::type sigmoid;
 
 
     /*
      *  hyperbolic tangent activation
      */
 
-    extern ::actfunc::type Tanh;
+    extern ::actfunc::type tanh;
 
 
     /*
      *  Rectified Linear Unit activation
      */
 
-    extern ::actfunc::type ReLU;
+    extern ::actfunc::type relu;
     
 
     /*
      *  Linear activation
      */
 
-    extern ::actfunc::type Linear;
+    extern ::actfunc::type linear;
 };

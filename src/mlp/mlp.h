@@ -11,7 +11,7 @@
 #include "params.h"
 #include "utils.h"
 
-class Neural::mlp : public Neural::Net<vfloat, vfloat> {
+class Neural::mlp :public Neural::net<vf32, vf32> {
     public:
 
         /*
@@ -29,16 +29,16 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  TODO: integrate Corpus object to facilitate importing data from files and such
          */
 
-        float regress(const mfloat &data, const mfloat &target, metadata_t params) override;
-        int32_t predict(const mfloat &data, mfloat &output) override;
+        f32 regress(const mf32 &data, const mf32 &target, metadata_t params) override;
+        i32 predict(const mf32 &data, mf32 &output) override;
 
 
         /* 
          *  pure virtual Network function declarations, for loading and saving topology/wandb to external disk 
          */ 
 
-        int32_t load(const std::string src) override;
-        int32_t save(const std::string src) override;
+        i32 load(const std::string src) override;
+        i32 save(const std::string src) override;
 
 
         /* 
@@ -46,10 +46,10 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          * used for construction of structure as changing topology screws with parameters previously trained 
          */
 
-        int32_t push_back(uint32_t n, actfunc::type af);
-        int32_t pop_back();
-        int32_t insert(uint32_t idx, uint32_t n, actfunc::type af);
-        int32_t erase(uint32_t idx);
+        i32 push_back(u32 n, actfunc::type af);
+        i32 pop_back();
+        i32 insert(u32 idx, u32 n, actfunc::type af);
+        i32 erase(u32 idx);
     
     private:
 
@@ -58,16 +58,16 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
           *  used only locally within scope of mlp object therefore defined inside it as private
           */ 
 
-        struct __attribute__((packed)) Biases {
-            vfloat b;
+        struct __attribute__((packed)) biases {
+            vf32 b;
 
-            Biases(size_t n) :b(n, 0.0f) {
+            biases(size_t n) :b(n, 0.0f) {
                 std::generate(b.begin(), b.end(), []() {
                     return utils::random();
                 });
             };
 
-            float operator [](uint32_t &idx) {
+            f32 operator [](u32 &idx) {
                 return b[idx];
             }
         };
@@ -78,10 +78,10 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  used only locally within scope of mlp object therefore defined inside it as private
          */ 
 
-        struct __attribute__((packed)) Weights {
-            mfloat w;
+        struct __attribute__((packed)) weights {
+            mf32 w;
 
-            Weights(size_t x, size_t y) : w(x, vfloat(y, 0.0f)) {
+            weights(size_t x, size_t y) : w(x, vf32(y, 0.0f)) {
                 for(size_t n = 0; n < x; ++n) {
                     std::generate(w[n].begin(), w[n].end(), []() {
                         return utils::random();
@@ -89,7 +89,7 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
                 }
             }
 
-            vfloat operator [](uint32_t &idx) {
+            vf32 operator [](uint32_t &idx) {
                 return w[idx];
             }
         };
@@ -100,10 +100,10 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  used only locally within scope of mlp object therefore defined inside it as private
          */ 
 
-        struct __attribute__((packed)) Neurons {
-            vfloat x, e;
+        struct __attribute__((packed)) neurons {
+            vf32 x, e;
 
-            Neurons(size_t n) : x(n, 0.0f), e(n, 0.0f) {
+            neurons(size_t n) : x(n, 0.0f), e(n, 0.0f) {
                 std::generate(x.begin(), x.end(), []() {
                     return utils::random();
                 });
@@ -120,13 +120,13 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  used only locally within scope of mlp object therefore defined inside it as private
          */ 
 
-        struct Layer {
+        struct layer {
             size_t size;
-            Neurons neurons;
-            Biases biases;
+            neurons neurons;
+            biases biases;
             actfunc::type activation;
 
-            Layer(size_t n, actfunc::type af) 
+            layer(size_t n, actfunc::type af) 
                :size(n), 
                 neurons(n), 
                 biases(n), 
@@ -134,8 +134,8 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
                 // all already initialised
             };
 
-            float propagate(Layer &next, Weights &weights);
-            float backtrack(Layer &prev, Weights &weights);
+            f32 propagate(layer &next, weights &weights);
+            f32 backtrack(layer &prev, weights &weights);
         };
 
 
@@ -144,8 +144,8 @@ class Neural::mlp : public Neural::Net<vfloat, vfloat> {
          *  used only locally within scope of mlp object therefore defined inside it as private
          */
 
-        std::vector<Layer> layers; 
-        std::vector<Weights> weights;
+        std::vector<layer> _layers; 
+        std::vector<weights> _weights;
 
-    // mlpNet object
+    // mlp object
 };

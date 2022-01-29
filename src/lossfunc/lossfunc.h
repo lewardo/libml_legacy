@@ -4,7 +4,7 @@
 #include <functional>
 
 #include "neural.h"
-
+#include "types.h"
 
 /*
  *  lossfunc namespace, to clarify useage
@@ -15,8 +15,8 @@ namespace lossfunc {
      *  using declarations
      */  
 
-    using vfloat = std::vector<float>;
-    using lf = std::function<float (float, float)>;
+    using namespace mltypes;
+    using lf = std::function<f32 (f32, f32)>;
 
 
     /*
@@ -43,26 +43,26 @@ namespace lossfunc {
      *  Accumulator function to simplify error calculation
      */
 
-    float accumulate(vfloat, vfloat, lf);
+    float accumulate(vf32, vf32, lf);
 
 
     /*
      *  Mean Squared Error (L2)
      */
 
-    extern ::lossfunc::type MeanSquared;
+    extern ::lossfunc::type mse;
 
 
     /*
      *  Mean Absolute Error (L1)
      */
 
-    extern ::lossfunc::type MeanAbsolute;
+    extern ::lossfunc::type mae;
 
 
     /*
      *  Cross Entropy or Log Loss Error
      */
 
-    extern ::lossfunc::type CrossEntropy;
+    extern ::lossfunc::type xee;
 };

@@ -3,44 +3,40 @@
 #include <cstdbool>
 #include <vector>
 #include <initializer_list>
-#include <variant>
+
+#include "types.h"
 
 namespace Corpus {
-    using vfloat = std::vector<float>;
-    using mfloat = std::vector<vfloat>;
+    using namespace mltypes;
 
-    using variant = std::variant<vfloat, mfloat>;
-
-    class Base {
+    template <typename t>
+    class base {
         public:
-            virtual ~Base() = default;
+            base(std::string);
+            base(std::initializer_list<t>);
 
-            virtual variant operator [](const int& idx) = 0;
+            virtual ~base() = default;
+
+            virtual t operator [](const i32& idx) = 0;
 
         protected:
-            Base(std::string, bool);
-            Base(std::initializer_list<variant>, bool);
-
-            std::vector<variant> data;
+            std::vector<t> data;
     };
 
-    namespace Unicor {
-        class type : public Base {
-            public:
-                type(std::string);
-                type(std::initializer_list<variant>);
 
-                variant operator [](const int&) override;
-        };
+    class set :public base<f32> {
+        public:
+            using base<f32>::base;
+
+            f32 operator [](const i32&) override;
     };
 
-    namespace Bicor {
-        class type : public Base {
-            public:
-                type(std::string);
-                type(std::initializer_list<variant>);
 
-                variant operator [](const int&) override;
-        };
+    class map :public base<df32> {
+        public:
+            map(std::string);
+            map(std::initializer_list<df32>);
+
+            df32 operator [](const i32&) override;
     };
 }

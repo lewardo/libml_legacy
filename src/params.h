@@ -3,9 +3,13 @@
 #include "actfunc.h"
 #include "lossfunc.h"
 
+#include "types.h"
+
+using namespace mltypes;
+
 using metadata_t = struct {
-    float lr, mo, cutoff;
-    uint32_t batch;
+    f32 lr, mo, cutoff;
+    u32 batch;
     lossfunc::type lf;
 };
 
