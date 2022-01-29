@@ -3,12 +3,12 @@
 ### current implementations:
 + file structure
 + Network abstact class
-+ mlpNet object, without functions implemented yet
++ mlp object, without functions implemented yet
 ### TODOS:
 + Corpus object to import data from files
 + compatibility for training with corpus object for Network inheritors
 + autoencoder template to create an autoencoder from any Network inheritor
-+ the NetChain object that chains inputs to outputs to create single comples network objects
++ the NetChain object that chains inputs to outputs to create single complex network objects
 ### future additions:
 + an RNN, LSTM, GRU 
 + CNN 
