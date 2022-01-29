@@ -13,8 +13,8 @@ CXXFLAGS += -std=c++17 -pedantic -Wall -O3 $(INCLUDE)
 LDFLAGS += -lm
 
 source 	= $(shell find . -type f | grep -m 1 $*.cpp)
-done 	:= 0
 c 		:= \033[2K\r
+done 	:= 1
 
 
 .PHONY: all run build clean
