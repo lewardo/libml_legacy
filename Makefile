@@ -4,42 +4,37 @@ SRC		:= src
 BIN		:= build
 EXE		:= $(BIN)/main
 OBJ		:= $(BIN)/obj
+DEPS	:= $(BIN)/deps
 
 SRCS	:= $(shell find . -name '*.cpp')
-OBJS	:= $(shell find . -name '*.cpp' | xargs -L 1 basename | sed 's/cpp$$/o/' | awk '{ print "$(OBJ)/" $$0 }')
+VPATH	:= $(dir $(SRCS))
+OBJS	:= $(patsubst %.cpp, $(OBJ)/%.o, $(notdir $(SRCS)))
 INCLUDE	:= $(shell find $(SRC) -type d | xargs printf '\-I%s ' | xargs)
 
 CXXFLAGS += -std=c++17 -pedantic -Wall -O3 $(INCLUDE)
 LDFLAGS += -lm
 
-source 	= $(shell find . -type f | grep -m 1 $*.cpp)
-c 		:= \033[2K\r
-done 	:= 1
-
-
-.PHONY: all run build clean
-
-all run: build
-	@ $(EXE)
+.PHONY: all run build clean newline
+.SILENT:
 
 build: $(EXE)
 
+all run: build
+	$(EXE)
+
 $(EXE): $(OBJS) | $(OBJ)
-	@ printf "$clinking $@..."
-	@ $(CPP) $(LDFLAGS) $^ -o $@
-	@ printf "$c"
+	echo "linking $@..."
+	$(CPP) $(LDFLAGS) $^ -o $@
 
-.SECONDEXPANSION:
+$(OBJ)/%.o: %.cpp | $(OBJ) $(DEPS)
+	echo "building $@..."
+	$(CPP) $(CXXFLAGS) -c -MMD -MF $(DEPS)/$(shell echo $@ | xargs -L 1 basename | sed 's/o$$/d/') $< -o $@
 
-$(OBJ)/%.o: $${source} | $(OBJ)
-	@ printf "$c[$(done)/$(words $(OBJS))] building $@..."
-	@ $(eval done = $(shell echo $$(($(done) + 1))))
-
-	@ $(CPP) -c $< $(CXXFLAGS) -o $@
-
-$(OBJ):
-	@ mkdir -p $@
+$(OBJ) $(DEPS):
+	mkdir -p $@
 
 clean:
-	@ printf "$ccleaning..."
-	@ rm -rf $(BIN)
+	echo "cleaning..."
+	rm -rf $(BIN)
+
+-include $(DEPS)/*.d
