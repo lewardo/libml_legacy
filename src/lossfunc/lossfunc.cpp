@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cmath>
 #include <vector>
 #include <functional>
 #include <numeric>
@@ -64,13 +65,13 @@ lossfunc::type lossfunc::mae = {
 
 lossfunc::type lossfunc::xee = {
     [](f32 x, f32 t) -> f32 {
-        if(t == 1.0f) 
+        if(t == 1.0f)
             return -1.0f * logf(x);
         return -1.0f * logf(1.0f - x);
     },
 
     [](f32 x, f32 t) -> f32 {
-        if(t == 1.0f) 
+        if(t == 1.0f)
             return -1.0f / x;
         return -1.0f / (1.0f - t);
     },
