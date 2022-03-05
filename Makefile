@@ -14,27 +14,39 @@ INCLUDE	:= $(shell find $(SRC) -type d | xargs printf '\-I%s ' | xargs)
 CXXFLAGS += -std=c++17 -pedantic -Wall -O3 $(INCLUDE)
 LDFLAGS += -lm
 
-.PHONY: all run build clean newline
+ifndef ECHO
+HIT_N			?= 0
+HIT_TOTAL := $(shell ECHO="HIT_MARK" $(MAKE) $(MAKECMDGOALS) --dry-run | grep -c "HIT_MARK")
+HIT_COUNT = $(eval HIT_N = $(shell expr $(HIT_N) + 1))$(HIT_N)
+ECHO = echo "[$(HIT_COUNT)/$(HIT_TOTAL)]"
+endif
+
+.PHONY: all run build rebuild clean
 .SILENT:
+
+all: clean build
+	$(EXE)
 
 build: $(EXE)
 
-all run: build
+rebuild: clean build
+
+run: build
 	$(EXE)
 
 $(EXE): $(OBJS) | $(OBJ)
-	echo "linking $@..."
+	$(ECHO) "linking $@..."
 	$(CPP) $(LDFLAGS) $^ -o $@
 
 $(OBJ)/%.o: %.cpp | $(OBJ) $(DEPS)
-	echo "building $@..."
+	$(ECHO) "building $@..."
 	$(CPP) $(CXXFLAGS) -c -MMD -MF $(DEPS)/$(shell echo $@ | xargs -L 1 basename | sed 's/o$$/d/') $< -o $@
 
 $(OBJ) $(DEPS):
 	mkdir -p $@
 
 clean:
-	echo "cleaning..."
+	$(ECHO) "cleaning..."
 	rm -rf $(BIN)
 
 -include $(DEPS)/*.d
