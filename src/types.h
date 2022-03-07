@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include <vector>
+#include <memory>
+
+#define c_cast(t, v) ((t) (v))
 
 #define types(n, t)                     \
     n = t;                              \
@@ -13,4 +16,7 @@ namespace mltypes {
     using types(f32, float);
     using types(i32, int32_t);
     using types(u32, uint32_t);
+
+    template <typename T = f32>
+    class vector;
 }
