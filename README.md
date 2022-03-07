@@ -1,5 +1,5 @@
 # libml
-## a more fully fledged machine learning library for the c programming language
+## a more fully fledged machine learning library for the c++ programming language
 ### current implementations:
 + file structure
 + Network abstact class
@@ -10,10 +10,10 @@
 + autoencoder template to create an autoencoder from any Network inheritor
 + the NetChain object that chains inputs to outputs to create single complex network objects
 ### future additions:
-+ an RNN, LSTM, GRU 
-+ CNN 
-+ KNN 
-+ k-means training, SGD, BGD 
++ an RNN, LSTM, GRU
++ CNN
++ KNN
++ k-means training, SGD, BGD
 + AdaM and various optimisers
 
 ---
