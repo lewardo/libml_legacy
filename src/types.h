@@ -3,7 +3,12 @@
 #include <vector>
 #include <memory>
 
-#define c_cast(t, v) ((t) (v))
+// #define c_cast(t, v) ((t) (v))
+
+template <typename T, typename S>
+T c_cast(const S& o) {
+    return ((T) (o));
+};
 
 #define types(n, t)                     \
     n = t;                              \
@@ -12,11 +17,15 @@
     using v ## n = std::vector<t>;      \
     using m ## n = std::vector<v ## n>
 
-namespace mltypes {
+namespace ml::types {
     using types(f32, float);
     using types(i32, int32_t);
     using types(u32, uint32_t);
 
-    template <typename T = f32>
     class vector;
+
+    class matrix;
+
+    template <typename T = vector>
+    using series = std::vector<T>;
 }
