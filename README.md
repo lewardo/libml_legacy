@@ -1,11 +1,12 @@
 # libml
-## a more fully fledged machine learning library for the c++ programming language
+## a machine learning library for c++20
 ### current implementations:
-+ Network abstact class
++ global ml namespace
++ network abstact class
 + actfunc and lossfunc namespaces
 + vector wrapper
 ### TODOS:
-+ rudimentary linear algebra framework
++ linear algebra framework
 + Corpus object to import data from files
 + compatibility for training with corpus object for Network inheritors
 + autoencoder template to create an autoencoder from any Network inheritor
@@ -17,7 +18,7 @@
 + AdaM and various optimisers
 
 ---
-```bash
+```shell
 # compile + link
 % make build
 # build + run
