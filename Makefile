@@ -1,4 +1,4 @@
-CPP			?= g++
+CPP			:= g++-11
 
 SRC			:= src
 BIN			?= build
@@ -11,7 +11,7 @@ VPATH		:= $(dir $(SRCS))
 OBJS		:= $(patsubst %.cpp, $(OBJ)/%.o, $(notdir $(SRCS)))
 INCLUDE		:= $(shell find $(SRC) -type d | xargs printf '\-I%s ' | xargs)
 
-STD 		?= c++1z
+STD 		?= c++2a
 OPTIMISE	?= 0
 
 CXXFLAGS 	+= -std=$(STD) -pedantic -Wall -O$(OPTIMISE) $(INCLUDE)
@@ -37,15 +37,15 @@ endif
 .SILENT:
 
 all: clean build
-	$(ECHO) "running $(EXE):"
+	$(ECHO) "running \033[4m$(EXE)\033[0m:"
 	$(EXE)
 
 build: $(EXE)
 
 rebuild: clean $(EXE)
 
-exec run: build
-	$(ECHO) "running $(EXE):"
+run: build
+	$(ECHO) "running \033[4m$(EXE)\033[0m:"
 	$(EXE)
 
 $(EXE): $(OBJS) | $(OBJ)
