@@ -12,10 +12,10 @@ namespace ml::net {
     class network;
     
     template <typename Ti, typename To>
-    f32 train(network<Ti, To>&);
+    flt train(network<Ti, To>&);
 
     template <typename Ti, typename To>    
-    f32 predict(network<Ti, To>&);
+    flt predict(network<Ti, To>&);
 
     class mlp;
 };

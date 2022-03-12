@@ -35,9 +35,18 @@ class ml::net::network {
          *      > predicting will return an error code, usually 0 for success and >0 for an error
          */
 
-        virtual f32 propagate(const std::vector<it> &data, const std::vector<ot> &target, metadata_t params) = 0;
-        virtual i32 calculate(const std::vector<it> &data, std::vector<ot> &output) = 0;
-        virtual i32 update(metadata_t params) = 0;
+        virtual flt propagate(const std::vector<it> &data, const std::vector<ot> &target, metadata_t params) = 0;
+        virtual int calculate(const std::vector<it> &data, std::vector<ot> &output) = 0;
+        virtual int update(metadata_t params) = 0;
+
+
+        /*
+         *  Pure virtual functions that all the neural networks should have implemented
+         *  enables later saving and loading from drive
+         */
+
+        virtual int load(const std::string src) = 0;
+        virtual int save(const std::string src) = 0;
 
     protected:
         /* variable to tell whether it has been initialised */

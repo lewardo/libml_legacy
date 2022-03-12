@@ -9,7 +9,7 @@
 namespace ml::utils {
     using namespace types;
 
-    inline f32 random() {
+    inline flt random() {
         return 2 * rand() / RAND_MAX - 1.0f;
     }
 }

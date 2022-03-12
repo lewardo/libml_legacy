@@ -28,14 +28,14 @@ namespace ml::actf {
          *  activation function itself
          */
 
-        std::function<f32 (f32)> f;
+        std::function<flt (flt)> f;
 
 
         /*
          *  derivative of the activation function in terms of the original output
          */
 
-        std::function<f32 (f32)> df;
+        std::function<flt (flt)> df;
     };
 
 
@@ -44,11 +44,11 @@ namespace ml::actf {
      */
 
     static actf::value_type sigmoid = {
-        [](f32 x) -> f32 {
+        [](flt x) -> flt {
             return 1.0f / (1.0f + expf(-1.0f * x));
         },
 
-        [](f32 x) -> f32 {
+        [](flt x) -> flt {
             return x * (1.0f - x);
         }
     };
@@ -59,11 +59,11 @@ namespace ml::actf {
      */
 
     static actf::value_type tanh = {
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             return tanhf(x);
         },
 
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             return 1.0f - x * x;
         }
     };
@@ -74,12 +74,12 @@ namespace ml::actf {
      */
 
     static actf::value_type relu = {
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             if(x > 0.0f) return x;
             else return 0.0f;
         },
 
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             if(x > 0.0f) return 1.0f;
             else return 0.0f;
         }
@@ -91,11 +91,11 @@ namespace ml::actf {
      */
 
     static actf::value_type linear = {
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             return x;
         },
 
-        [] (f32 x) -> f32 {
+        [] (flt x) -> flt {
             return 1.0f;
         }
     };

@@ -6,6 +6,7 @@
 #include <execution>
 
 #include "neural.h"
+#include "vector.h"
 #include "types.h"
 
 /*
@@ -29,14 +30,14 @@ namespace ml::lossf {
          *  loss function itself
          */
 
-        std::function<f32 (f32, f32)> f;
+        std::function<flt (flt, flt)> f;
 
 
         /*
          *  derivative of the loss function
          */
 
-        std::function<f32 (f32, f32)> df;
+        std::function<flt (flt, flt)> df;
     };
 
 
@@ -45,10 +46,12 @@ namespace ml::lossf {
      */
 
     [[maybe_unused]]
-    static float accumulate(const vf32& a, const vf32& b, std::function<f32 (f32, f32)>& f) {
-        if(a.size() > b.size()) return -1;  // return if mismatched sizes
+    static float accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {
+        const std::vector<flt> &sa = types::std(a), &sb = types::std(b);
+        
+        if(sa.size() != sb.size()) return -1;  // return if mismatched sizes
 
-        return std::transform_reduce(std::execution::par, a.begin(), a.end(), b.begin(), 0.0f, std::plus<f32>(), f);
+        return std::transform_reduce(std::execution::par, sa.begin(), sa.end(), sb.begin(), 0.0f, std::plus<flt>(), f);
     };
 
 
@@ -57,12 +60,12 @@ namespace ml::lossf {
      */
 
     static lossf::value_type mse = {
-        [](f32 x, f32 t) -> f32 {
-            f32 d = t - x;
+        [](flt x, flt t) -> flt {
+            flt d = t - x;
             return 0.5f * d * d;
         },
 
-        [](f32 x, f32 t) -> f32 {
+        [](flt x, flt t) -> flt {
             return x - t;
         },
     };
@@ -73,11 +76,11 @@ namespace ml::lossf {
      */
 
     static lossf::value_type mae = {
-        [](f32 x, f32 t) -> f32 {
+        [](flt x, flt t) -> flt {
             return fabsf(t - x);
         },
 
-        [](f32 x, f32 t) -> f32 {
+        [](flt x, flt t) -> flt {
             if(x < t) return -1.0f;
             else if(x > t) return 1.0f;
 
@@ -91,12 +94,12 @@ namespace ml::lossf {
      */
 
     static lossf::value_type xee = {
-        [](f32 x, f32 t) -> f32 {
+        [](flt x, flt t) -> flt {
             if(t == 1.0f) return -1.0f * logf(x);
             return -1.0f * logf(1.0f - x);
         },
 
-        [](f32 x, f32 t) -> f32 {
+        [](flt x, flt t) -> flt {
             if(t == 1.0f) return -1.0f / x;
             return -1.0f / (1.0f - t);
         },

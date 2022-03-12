@@ -7,8 +7,8 @@
 
 
 using metadata_t = struct {
-    ml::types::f32 lr, mo, cutoff;
-    ml::types::u32 batch;
+    ml::types::flt lr, mo, cutoff;
+    unsigned int batch;
     ml::lossf::value_type lf;
 };
 
