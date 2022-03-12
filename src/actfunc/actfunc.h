@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+#include <concepts>
 #include <functional>
 
 #include "types.h"
@@ -9,32 +11,31 @@
  *  actfunc namespace, to clarify useage
  */
 
-namespace actfunc {
+namespace ml::actf {
     /*
      *  using declarations
-     */  
+     */
 
-    using namespace mltypes;
-    using af = std::function<f32 (f32)>;
+    using namespace ml::types;
 
 
     /*
      *  actfunc type, a struct consisting of two functions, the activation function itself and its derivative
      */
 
-    struct type {
+    struct value_type {
         /*
          *  activation function itself
          */
 
-        af f_x;
+        std::function<f32 (f32)> f;
 
 
         /*
-         *  activation of the loss function
+         *  derivative of the activation function in terms of the original output
          */
 
-        af df_dx;
+        std::function<f32 (f32)> df;
     };
 
 
@@ -42,26 +43,60 @@ namespace actfunc {
      *  sigmoid activation
      */
 
-    extern ::actfunc::type sigmoid;
+    static actf::value_type sigmoid = {
+        [](f32 x) -> f32 {
+            return 1.0f / (1.0f + expf(-1.0f * x));
+        },
+
+        [](f32 x) -> f32 {
+            return x * (1.0f - x);
+        }
+    };
 
 
     /*
      *  hyperbolic tangent activation
      */
 
-    extern ::actfunc::type tanh;
+    static actf::value_type tanh = {
+        [] (f32 x) -> f32 {
+            return tanhf(x);
+        },
+
+        [] (f32 x) -> f32 {
+            return 1.0f - x * x;
+        }
+    };
 
 
     /*
      *  Rectified Linear Unit activation
      */
 
-    extern ::actfunc::type relu;
-    
+    static actf::value_type relu = {
+        [] (f32 x) -> f32 {
+            if(x > 0.0f) return x;
+            else return 0.0f;
+        },
+
+        [] (f32 x) -> f32 {
+            if(x > 0.0f) return 1.0f;
+            else return 0.0f;
+        }
+    };
+
 
     /*
      *  Linear activation
      */
 
-    extern ::actfunc::type linear;
-};
+    static actf::value_type linear = {
+        [] (f32 x) -> f32 {
+            return x;
+        },
+
+        [] (f32 x) -> f32 {
+            return 1.0f;
+        }
+    };
+}
