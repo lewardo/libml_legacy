@@ -5,20 +5,12 @@
 #include <functional>
 #include <numeric>
 #include <stdexcept>
+#include <execution>
 #include <utility>
 
 #include "types.h"
 
-namespace mltypes {
-    /*
-     *  helper function to extract std::vector
-     */
-    template <typename T>
-    std::vector<T>& std(const mltypes::vector<T>& v) {
-        return c_cast(mltypes::vector<T>&, v).std();
-    };
-
-    template <typename T>
+namespace ml::types {
     class vector {
         public:
             /*
@@ -35,7 +27,7 @@ namespace mltypes {
              */
 
             template <typename ...Args>
-            vector(std::initializer_list<T> init, Args&&... args):
+            vector(std::initializer_list<f32> init, Args&&... args):
                 _internal(init, std::forward<Args>(args)...) {}
 
 
@@ -43,7 +35,7 @@ namespace mltypes {
              *  explicit std::vector constructor to allow automatic type casting
              */
 
-            vector(const std::vector<T>& init):
+            vector(const std::vector<f32>& init):
                 _internal(init) {};
 
 
@@ -51,7 +43,7 @@ namespace mltypes {
              *  copy constructor
              */
 
-            vector(const mltypes::vector<T>& init):
+            vector(const vector& init):
                 _internal(init._internal) {};
 
 
@@ -59,7 +51,7 @@ namespace mltypes {
              *  move constructor
              */
 
-            vector(mltypes::vector<T>&& init):
+            vector(vector&& init):
                 _internal(std::move(init._internal)) {};
 
             /*
@@ -73,8 +65,16 @@ namespace mltypes {
              *  copy assignment operator
              */
 
-            mltypes::vector<T>& operator=(const mltypes::vector<T>& other) {
+            vector& operator=(const vector& other) {
                 _internal = other._internal;
+
+                return *this;
+            };
+            
+            vector& operator=(const std::vector<f32>&v) {
+                _internal = v;
+
+                return *this;
             };
 
 
@@ -82,8 +82,16 @@ namespace mltypes {
              *  move assignment operator
              */
 
-            mltypes::vector<T>& operator=(mltypes::vector<T>&& other) {
+            vector& operator=(vector&& other) {
                 _internal = std::move(other._internal);
+
+                return *this;
+            };
+            
+            vector& operator=(std::vector<f32>&&v) {
+                _internal = std::move(_internal);
+
+                return *this;
             };
 
 
@@ -92,7 +100,7 @@ namespace mltypes {
              *  casting operator to allow automatic type conversion
              */
 
-            operator std::vector<T>() const {
+            operator std::vector<f32>() const {
                 return _internal;
             };
 
@@ -101,18 +109,18 @@ namespace mltypes {
              *  addition operations, returning new objects
              */
 
-            mltypes::vector<T> operator+(const T& x) const {
-                std::vector<T> merged, other(_internal.size(), x);  // output vector, summee though std::vector's repeat constructor
-
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ std::back_inserter(merged), std::plus<T>());
+            vector operator+(const f32& x) const {
+                std::vector<f32> merged(_internal.size()), other(_internal.size(), x);
+                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<f32>());
 
                 return merged;
             };
 
-            mltypes::vector<T> operator+(const std::vector<T>& other) const {
-                std::vector<T> merged;
-
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ std::back_inserter(merged), std::plus<T>());
+            vector operator+(const std::vector<f32>& other) const {
+                if(_internal.size() != other.size()) throw std::length_error("operator+ vector size mismatch");
+                
+                std::vector<f32> merged(_internal.size());
+                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<f32>());
 
                 return merged;
             };
@@ -122,71 +130,84 @@ namespace mltypes {
              *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
              */
 
-            mltypes::vector<T>& operator+=(const T& x) {
-                std::vector<T> other(_internal.size(), x);
-
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ _internal.begin(), std::plus<T>());
+            vector& operator+=(const f32& x) {
+                std::vector<f32> other(_internal.size(), x);
+                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::plus<f32>());
 
                 return *this;
             };
 
-            mltypes::vector<T>& operator+=(const std::vector<T>& other) {
+            vector& operator+=(const std::vector<f32>& other) {
                 if(_internal.size() != other.size()) throw std::length_error("operator+= vector size mismatch");
 
-                std::transform(_internal.begin(), _internal.end(),other.begin(), /* other.end(), */ _internal.begin(), std::plus<T>());
+                std::transform(std::execution::par, _internal.begin(), _internal.end(),other.begin(), _internal.begin(), std::plus<f32>());
 
                 return *this;
             };
 
 
             /*
-             *  subtraction operations, bound to increment operations through template literal
+             *  subtraction operations, returning new objects
              */
 
-            template<typename Arg>
-            auto operator-(Arg&& arg) -> decltype(operator+(std::forward<Arg>(arg)) * -1) const {
-                return operator+(std::forward<Arg>(arg) * -1);
-            }
+            vector operator-(const f32& x) const {
+                std::vector<f32> merged(_internal.size()), other(_internal.size(), x);
+                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<f32>());
+
+                return merged;
+            };
+
+            vector operator-(const std::vector<f32>& other) const {
+                if(_internal.size() != other.size()) throw std::length_error("operator- vector size mismatch");
+                
+                std::vector<f32> merged(_internal.size());
+                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<f32>());
+
+                return merged;
+            };
 
 
             /*
-             *  minus-equals operations, bound to increment operations through template literal
+             *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
              */
 
-            template<typename Arg>
-            auto operator-=(Arg&& arg) -> decltype(operator+=(std::forward<Arg>(arg)) * -1) {
-                return operator+=(std::forward<Arg>(arg) * -1);
-            }
+            vector& operator-=(const f32& x) {
+                std::vector<f32> other(_internal.size(), x);
+                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::minus<f32>());
+
+                return *this;
+            };
+
+            vector& operator-=(const std::vector<f32>& other) {
+                if(_internal.size() != other.size()) throw std::length_error("operator-= vector size mismatch");
+
+                std::transform(std::execution::par, _internal.begin(), _internal.end(),other.begin(), _internal.begin(), std::minus<f32>());
+
+                return *this;
+            };
 
 
             /*
              *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
              */
 
-            T operator*(const std::vector<T>& other) const {
-                std::vector<T> merged;
-
+            f32 operator*(const std::vector<f32>& other) const {
                 if(_internal.size() != other.size()) throw std::length_error("operator* vector size mismatch");
-
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ std::back_inserter(merged), std::multiplies<T>());
-
-                return std::accumulate(merged.begin(), merged.end(), 0.0f);
+                
+                return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
             };
 
-            mltypes::vector<T> operator*(const T& x) const {
-                std::vector<T> merged, other(_internal.size(), x);
+            vector operator*(const f32& x) const {
+                std::vector<f32> other(_internal.size(), x);
 
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ std::back_inserter(merged), std::multiplies<T>());
-
-                return merged;
+                return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
             };
 
-            mltypes::vector<T> operator&(const std::vector<T>& other) const {
-                std::vector<T> merged;
+            vector operator&(const std::vector<f32>& other) const {
+                if(_internal.size() != other.size()) throw std::length_error("operator& vector size mismatch");
 
-                if(_internal.size() != other.size()) throw std::length_error("operator* vector size mismatch");
-
-                std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ std::back_inserter(merged), std::multiplies<T>());
+                std::vector<f32> merged(_internal.size());
+                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::multiplies<f32>());
 
                 return merged;
             };
@@ -196,18 +217,17 @@ namespace mltypes {
              *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
              */
 
-             mltypes::vector<T>& operator*=(const T& x) {
-                 std::vector<T> other(_internal.size(), x);
-
-                 std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ _internal.begin(), std::multiplies<T>());
+             vector& operator*=(const f32& x) {
+                 std::vector<f32> other(_internal.size(), x);
+                 std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::multiplies<f32>());
 
                  return *this;
              };
 
-             mltypes::vector<T>& operator&=(const std::vector<T>& other) {
-                 if(_internal.size() != other.size()) throw std::length_error("operator* vector size mismatch");
+             vector& operator&=(const std::vector<f32>& other) {
+                 if(_internal.size() != other.size()) throw std::length_error("operator&= vector size mismatch");
 
-                 std::transform(_internal.begin(), _internal.end(), other.begin(), /* other.end(), */ _internal.begin(), std::multiplies<T>());
+                 std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::multiplies<f32>());
 
                  return *this;
              };
@@ -217,17 +237,17 @@ namespace mltypes {
              *  array access operator
              */
 
-            T operator[](const u32 idx) const {
+            f32 operator[](const u32 idx) const {
                 return _internal[idx];
             };
 
 
             /*
-             *  static helper funtion to access internal std::vector, use mltypes::std(v) instead
+             *  static helper funtion to access internal std::vector, use ml::types::std(v) instead
              */
 
-            std::vector<T>& std() const {
-                return c_cast(std::vector<T>&, _internal);
+            std::vector<f32>& std() const {
+                return c_cast<std::vector<f32>&> (_internal);
             };
 
         private:
@@ -235,7 +255,17 @@ namespace mltypes {
              *  internal vector
              */
 
-            std::vector<T> _internal;
-            u32 _dim;
+            std::vector<f32> _internal;
     };
 };
+
+namespace ml::types {
+    /*
+     *  helper function to extract std::vector
+     */
+     
+    [[maybe_unused]]
+    static std::vector<f32>& std(const vector& v) {
+        return c_cast<vector&> (v).std();
+    };
+}
