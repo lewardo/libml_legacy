@@ -10,253 +10,266 @@
 
 #include "types.h"
 
-namespace ml::types {
-    class vector {
-        public:
-            /*
-             *  variadic constructor to forward to std::vector
-             */
+class ml::types::vector {
+    public:
+        /*
+         *  variadic constructor to forward to std::vector
+         */
 
-            template <typename ...Args>
-            vector(Args&&... args):
-                _internal(std::forward<Args>(args)...) {}
-
-
-            /*
-             *  variadic constructor to forward to std::vector for std::initializer_list constructors
-             */
-
-            template <typename ...Args>
-            vector(std::initializer_list<flt> init, Args&&... args):
-                _internal(init, std::forward<Args>(args)...) {}
+        template <typename ...Args>
+        vector(Args&&... args):
+            _internal(std::forward<Args>(args)...) {}
 
 
-            /*
-             *  explicit std::vector constructor to allow automatic type casting
-             */
+        /*
+         *  variadic constructor to forward to std::vector for std::initializer_list constructors
+         */
 
-            vector(const std::vector<flt>& init):
-                _internal(init) {};
-
-
-            /*
-             *  copy constructor
-             */
-
-            vector(const vector& init):
-                _internal(init._internal) {};
+        template <typename ...Args>
+        vector(std::initializer_list<flt> init, Args&&... args):
+            _internal(std::forward<std::initializer_list<flt>> (init), std::forward<Args>(args)...) {}
 
 
-            /*
-             *  move constructor
-             */
+        /*
+         *  explicit std::vector constructor to allow automatic type casting
+         */
 
-            vector(vector&& init):
-                _internal(std::move(init._internal)) {};
-
-            /*
-             *  destructor
-             */
-
-             ~vector() = default;
+        vector(const std::vector<flt>& init):
+            _internal(init) {};
 
 
-            /*
-             *  copy assignment operator
-             */
+        /*
+         *  copy constructor
+         */
 
-            vector& operator=(const vector& other) {
-                _internal = other._internal;
+        vector(const vector& init):
+            _internal(init._internal) {};
 
-                return *this;
-            };
+
+        /*
+         *  move constructor
+         */
+
+        vector(vector&& init):
+            _internal(std::move(init._internal)) {};
+
+        /*
+         *  destructor
+         */
+
+         ~vector() = default;
+
+
+        /*
+         *  copy assignment operator
+         */
+
+        vector& operator=(const vector& other) {
+            _internal = other._internal;
+
+            return *this;
+        };
+        
+        vector& operator=(const std::vector<flt> &v) {
+            _internal = v;
+
+            return *this;
+        };
+
+
+        /*
+         *  move assignment operator
+         */
+
+        vector& operator=(vector&& other) {
+            _internal = std::move(other._internal);
+
+            return *this;
+        };
+        
+        vector& operator=(std::vector<flt>&& v) {
+            _internal = std::move(_internal);
+
+            return *this;
+        };
+
+
+
+        /*
+         *  casting operator to allow automatic type conversion
+         */
+
+        operator std::vector<flt>() const {
+            return _internal;
+        };
+
+
+        /*
+         *  addition operations, returning new objects
+         */
+
+        vector operator+(const flt& x) const {
+            std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
+
+            return merged;
+        };
+
+        vector operator+(const std::vector<flt>& other) const {
+            if(_internal.size() != other.size()) throw std::length_error("operator+ vector size mismatch");
             
-            vector& operator=(const std::vector<flt>&v) {
-                _internal = v;
+            std::vector<flt> merged(_internal.size());
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
 
-                return *this;
-            };
+            return merged;
+        };
 
 
-            /*
-             *  move assignment operator
-             */
+        /*
+         *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
+         */
 
-            vector& operator=(vector&& other) {
-                _internal = std::move(other._internal);
-
-                return *this;
-            };
+        vector& operator+=(const flt& x) {
+            std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
             
-            vector& operator=(std::vector<flt>&&v) {
-                _internal = std::move(_internal);
+            _internal = std::move(merged);
 
-                return *this;
-            };
+            return *this;
+        };
 
+        vector& operator+=(const std::vector<flt>& other) {
+            if(_internal.size() != other.size()) throw std::length_error("operator+= vector size mismatch");
 
+            std::vector<flt> merged(_internal.size());
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
+            
+            _internal = std::move(merged);
 
-            /*
-             *  casting operator to allow automatic type conversion
-             */
-
-            operator std::vector<flt>() const {
-                return _internal;
-            };
-
-
-            /*
-             *  addition operations, returning new objects
-             */
-
-            vector operator+(const flt& x) const {
-                std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
-                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
-
-                return merged;
-            };
-
-            vector operator+(const std::vector<flt>& other) const {
-                if(_internal.size() != other.size()) throw std::length_error("operator+ vector size mismatch");
-                
-                std::vector<flt> merged(_internal.size());
-                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::plus<flt>());
-
-                return merged;
-            };
+            return *this;
+        };
 
 
-            /*
-             *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
-             */
+        /*
+         *  subtraction operations, returning new objects
+         */
 
-            vector& operator+=(const flt& x) {
-                std::vector<flt> other(_internal.size(), x);
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::plus<flt>());
+        vector operator-(const flt& x) const {
+            std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<flt>());
 
-                return *this;
-            };
+            return merged;
+        };
 
-            vector& operator+=(const std::vector<flt>& other) {
-                if(_internal.size() != other.size()) throw std::length_error("operator+= vector size mismatch");
+        vector operator-(const std::vector<flt>& other) const {
+            if(_internal.size() != other.size()) throw std::length_error("operator- vector size mismatch");
+            
+            std::vector<flt> merged(_internal.size());
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<flt>());
 
-                std::transform(std::execution::par, _internal.begin(), _internal.end(),other.begin(), _internal.begin(), std::plus<flt>());
-
-                return *this;
-            };
-
-
-            /*
-             *  subtraction operations, returning new objects
-             */
-
-            vector operator-(const flt& x) const {
-                std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
-                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<flt>());
-
-                return merged;
-            };
-
-            vector operator-(const std::vector<flt>& other) const {
-                if(_internal.size() != other.size()) throw std::length_error("operator- vector size mismatch");
-                
-                std::vector<flt> merged(_internal.size());
-                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<flt>());
-
-                return merged;
-            };
+            return merged;
+        };
 
 
-            /*
-             *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
-             */
+        /*
+         *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
+         */
 
-            vector& operator-=(const flt& x) {
-                std::vector<flt> other(_internal.size(), x);
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::minus<flt>());
+        vector& operator-=(const flt& x) {
+            std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::minus<flt>());
+            
+            _internal = std::move(merged);
 
-                return *this;
-            };
+            return *this;
+        };
 
-            vector& operator-=(const std::vector<flt>& other) {
-                if(_internal.size() != other.size()) throw std::length_error("operator-= vector size mismatch");
+        vector& operator-=(const std::vector<flt>& other) {
+            if(_internal.size() != other.size()) throw std::length_error("operator-= vector size mismatch");
 
-                std::transform(std::execution::par, _internal.begin(), _internal.end(),other.begin(), _internal.begin(), std::minus<flt>());
-
-                return *this;
-            };
-
-
-            /*
-             *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
-             */
-
-            flt operator*(const std::vector<flt>& other) const {
-                if(_internal.size() != other.size()) throw std::length_error("operator* vector size mismatch");
-                
-                return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
-            };
-
-            vector operator*(const flt& x) const {
-                std::vector<flt> other(_internal.size(), x);
-
-                return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
-            };
-
-            vector operator&(const std::vector<flt>& other) const {
-                if(_internal.size() != other.size()) throw std::length_error("operator& vector size mismatch");
-
-                std::vector<flt> merged(_internal.size());
-                std::transform(std::execution::par_unseq, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::multiplies<flt>());
-
-                return merged;
-            };
+            std::vector<flt> merged(_internal.size());
+            std::transform(std::execution::par, _internal.begin(), _internal.end(),other.begin(), merged.begin(), std::minus<flt>());
+            
+            _internal = std::move(merged);
+            
+            return *this;
+        };
 
 
-            /*
-             *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
-             */
+        /*
+         *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
+         */
 
-             vector& operator*=(const flt& x) {
-                 std::vector<flt> other(_internal.size(), x);
-                 std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::multiplies<flt>());
+        flt operator*(const std::vector<flt>& other) const {
+            if(_internal.size() != other.size()) throw std::length_error("operator* vector size mismatch");
+            
+            return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
+        };
 
-                 return *this;
-             };
+        vector operator*(const flt& x) const {
+            std::vector<flt> other(_internal.size(), x);
 
-             vector& operator&=(const std::vector<flt>& other) {
-                 if(_internal.size() != other.size()) throw std::length_error("operator&= vector size mismatch");
+            return std::transform_reduce(std::execution::par, _internal.begin(), _internal.end(), other.begin(), 0.0f);
+        };
 
-                 std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), _internal.begin(), std::multiplies<flt>());
+        vector operator&(const std::vector<flt>& other) const {
+            if(_internal.size() != other.size()) throw std::length_error("operator& vector size mismatch");
 
-                 return *this;
-             };
+            std::vector<flt> merged(_internal.size());
+            std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::multiplies<flt>());
 
-
-            /*
-             *  array access operator
-             */
-
-            flt operator[](const unsigned int idx) const {
-                return _internal[idx];
-            };
+            return merged;
+        };
 
 
-            /*
-             *  static helper funtion to access internal std::vector, use ml::types::std(v) instead
-             */
+        /*
+         *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
+         */
 
-            std::vector<flt>& std() const {
-                return c_cast<std::vector<flt>&> (_internal);
-            };
+         vector& operator*=(const flt& x) {
+             std::vector<flt> merged(_internal.size()), other(_internal.size(), x);
+             std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::multiplies<flt>());
+             
+             _internal = std::move(merged);
 
-        private:
-            /*
-             *  internal vector
-             */
+             return *this;
+         };
 
-            std::vector<flt> _internal;
-    };
+         vector& operator&=(const std::vector<flt>& other) {
+             if(_internal.size() != other.size()) throw std::length_error("operator&= vector size mismatch");
+
+             std::vector<flt> merged(_internal.size());
+             std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), std::multiplies<flt>());
+             
+             _internal = std::move(merged);
+
+             return *this;
+         };
+
+
+        /*
+         *  array access operator
+         */
+
+        flt operator[](const unsigned int idx) const {
+            return _internal[idx];
+        };
+
+
+        /*
+         *  static helper funtion to access internal std::vector, use ml::types::std(v) instead
+         */
+
+        std::vector<flt>& std() const {
+            return c_cast<std::vector<flt>&> (_internal);
+        };
+
+    private:
+        /*
+         *  internal vector
+         */
+
+        std::vector<flt> _internal;
 };
 
 namespace ml::types {
