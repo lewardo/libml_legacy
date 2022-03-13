@@ -3,6 +3,9 @@
 #include "types.h"
 #include "utils.h"
 
+#include "vector.h"
+#include "matrix.h"
+
 #include "actfunc.h"
 #include "lossfunc.h"
 
