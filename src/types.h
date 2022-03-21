@@ -10,8 +10,9 @@ T c_cast(const S& o) {
 namespace ml::types {
     using flt = float;  // or a double if you want a global change
 
-    class vector;
-    class matrix;
+    using vector = std::vector<flt>;
+
+    // class matrix;
 
     template <typename T = vector>
     using series = std::vector<T>;
