@@ -5,8 +5,23 @@
 #include "types.h"
 
 
-std::vector<ml::types::flt> operator+(const std::vector<ml::types::flt>&, const ml::types::flt&);
+ml::types::vector operator+(const ml::types::vector&, const ml::types::flt&);
+ml::types::vector operator+(const ml::types::vector & first, const ml::types::vector&);
 
-namespace ml::types {
-    
-}
+ml::types::vector& operator+=(ml::types::vector&, const ml::types::flt&);
+ml::types::vector& operator+=(ml::types::vector&, const ml::types::vector&);
+
+ml::types::vector operator-(const ml::types::vector&, const ml::types::flt&);
+ml::types::vector operator-(const ml::types::vector&, const ml::types::vector&);
+
+ml::types::vector& operator-=(ml::types::vector&, const ml::types::flt&);
+ml::types::vector& operator-=(ml::types::vector&, const ml::types::vector&);
+
+ml::types::flt operator*(const ml::types::vector&, const ml::types::vector&);
+ml::types::vector operator*(const ml::types::vector&, const ml::types::flt&);
+
+ml::types::vector operator&(const ml::types::vector&, const ml::types::vector&);
+ml::types::vector operator&(const ml::types::vector&, const ml::types::flt&);
+
+ml::types::vector& operator*=(ml::types::vector&, const ml::types::flt&);
+ml::types::vector& operator&=(ml::types::vector&, const ml::types::vector&);
