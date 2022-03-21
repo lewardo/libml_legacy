@@ -4,24 +4,21 @@
 #include <functional>
 #include <numeric>
 
+#include "algeb.h"
 #include "lossfunc.h"
 
+using namespace ml::types;
+using namespace ml::lossf;
 
 /*
  *  Accumulator function to simplify error calculation
  */
 
-lossfunc::f32 lossfunc::accumulate(vf32 a, vf32 b, lossfunc::lf f) {
-    vf32 merged;
+[[maybe_unused]]
+flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {        
+    if(a.size() != b.size()) return -1;  // return if mismatched sizes
 
-    // return if mismatched sizes
-    if(a.size() != b.size()) return -1.0f;
-
-    // transform vectors into third vector with the lossfunc (f) as the action function
-    std::transform(a.begin(), a.end(), b.begin(), /* b.end(), */ std::back_inserter(merged), f);
-
-    // accumulate across the merged vector and return the total
-    return std::accumulate(merged.begin(), merged.end(), 0.0f);
+    return std::transform_reduce(std::execution::par, a.begin(), a.end(), b.begin(), 0.0f, std::plus<flt>(), f);
 };
 
 
@@ -29,13 +26,13 @@ lossfunc::f32 lossfunc::accumulate(vf32 a, vf32 b, lossfunc::lf f) {
  *  Mean Squared Error (L2)
  */
 
-lossfunc::type lossfunc::mse = {
-    [](f32 x, f32 t) -> f32 {
-        f32 d = t - x;
+value_type ml::lossf::mse = {
+    [](flt x, flt t) -> flt {
+        flt d = t - x;
         return 0.5f * d * d;
     },
 
-    [](f32 x, f32 t) -> f32 {
+    [](flt x, flt t) -> flt {
         return x - t;
     },
 };
@@ -45,12 +42,12 @@ lossfunc::type lossfunc::mse = {
  *  Mean Absolute Error (L1)
  */
 
-lossfunc::type lossfunc::mae = {
-    [](f32 x, f32 t) -> f32 {
+value_type ml::lossf::mae = {
+    [](flt x, flt t) -> flt {
         return fabsf(t - x);
     },
 
-    [](f32 x, f32 t) -> f32 {
+    [](flt x, flt t) -> flt {
         if(x < t) return -1.0f;
         else if(x > t) return 1.0f;
 
@@ -60,19 +57,17 @@ lossfunc::type lossfunc::mae = {
 
 
 /*
- *  Cross Entropy or Log Loss Error, target consists of only 0s or 1s, used for classification problems
+ *  Cross Entropy or Log Loss Error
  */
 
-lossfunc::type lossfunc::xee = {
-    [](f32 x, f32 t) -> f32 {
-        if(t == 1.0f)
-            return -1.0f * logf(x);
+value_type ml::lossf::xee = {
+    [](flt x, flt t) -> flt {
+        if(t == 1.0f) return -1.0f * logf(x);
         return -1.0f * logf(1.0f - x);
     },
 
-    [](f32 x, f32 t) -> f32 {
-        if(t == 1.0f)
-            return -1.0f / x;
+    [](flt x, flt t) -> flt {
+        if(t == 1.0f) return -1.0f / x;
         return -1.0f / (1.0f - t);
     },
 };
