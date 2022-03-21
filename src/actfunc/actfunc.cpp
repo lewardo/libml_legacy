@@ -2,17 +2,20 @@
 
 #include "actfunc.h"
 
+using namespace ml::types;
+using namespace ml::actf;
+
 
 /*
  *  sigmoid activation
  */
 
-actfunc::type actfunc::sigmoid = {
-    [](f32 x) -> f32 {
+value_type ml::actf::sigmoid = {
+    [](flt x) -> flt {
         return 1.0f / (1.0f + expf(-1.0f * x));
     },
-    
-    [](f32 x) -> f32 {
+
+    [](flt x) -> flt {
         return x * (1.0f - x);
     }
 };
@@ -22,12 +25,12 @@ actfunc::type actfunc::sigmoid = {
  *  hyperbolic tangent activation
  */
 
-actfunc::type actfunc::tanh = {
-    [] (f32 x) -> f32 {
+value_type ml::actf::tanh = {
+    [] (flt x) -> flt {
         return tanhf(x);
     },
 
-    [] (f32 x) -> f32 {
+    [] (flt x) -> flt {
         return 1.0f - x * x;
     }
 };
@@ -37,13 +40,13 @@ actfunc::type actfunc::tanh = {
  *  Rectified Linear Unit activation
  */
 
-actfunc::type actfunc::relu = {
-    [] (f32 x) -> f32 {
+value_type ml::actf::relu = {
+    [] (flt x) -> flt {
         if(x > 0.0f) return x;
         else return 0.0f;
     },
 
-    [] (f32 x) -> f32 {
+    [] (flt x) -> flt {
         if(x > 0.0f) return 1.0f;
         else return 0.0f;
     }
@@ -54,12 +57,12 @@ actfunc::type actfunc::relu = {
  *  Linear activation
  */
 
-actfunc::type actfunc::linear = {
-    [] (f32 x) -> f32 {
+value_type ml::actf::linear = {
+    [] (flt x) -> flt {
         return x;
     },
-    
-    [] (f32 x) -> f32 {
+
+    [] (flt x) -> flt {
         return 1.0f;
     }
 };

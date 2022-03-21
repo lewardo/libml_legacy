@@ -43,60 +43,26 @@ namespace ml::actf {
      *  sigmoid activation
      */
 
-    static actf::value_type sigmoid = {
-        [](flt x) -> flt {
-            return 1.0f / (1.0f + expf(-1.0f * x));
-        },
-
-        [](flt x) -> flt {
-            return x * (1.0f - x);
-        }
-    };
+    extern value_type sigmoid;
 
 
     /*
      *  hyperbolic tangent activation
      */
 
-    static actf::value_type tanh = {
-        [] (flt x) -> flt {
-            return tanhf(x);
-        },
-
-        [] (flt x) -> flt {
-            return 1.0f - x * x;
-        }
-    };
+    extern value_type tanh;
 
 
     /*
      *  Rectified Linear Unit activation
      */
 
-    static actf::value_type relu = {
-        [] (flt x) -> flt {
-            if(x > 0.0f) return x;
-            else return 0.0f;
-        },
-
-        [] (flt x) -> flt {
-            if(x > 0.0f) return 1.0f;
-            else return 0.0f;
-        }
-    };
+    extern value_type relu;
 
 
     /*
      *  Linear activation
      */
 
-    static actf::value_type linear = {
-        [] (flt x) -> flt {
-            return x;
-        },
-
-        [] (flt x) -> flt {
-            return 1.0f;
-        }
-    };
+    extern value_type linear;
 }
