@@ -16,11 +16,11 @@ namespace ml::utils::random {
     void generate(T& value) {
         [[ maybe_unused ]]
         static auto seed = []() { 
-            std::srand(std::time(nullptr));
+            std::srand( std::time(nullptr) );
             return true;
         } ();
         
-        value = (T) (std::rand() / RAND_COEFF - 1.0f);
+        value = std::rand() / RAND_COEFF - 1.0f;
     }
     
     template <typename T> requires std::ranges::range<T>
