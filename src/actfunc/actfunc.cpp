@@ -12,7 +12,7 @@ using namespace ml::actf;
 
 value_type ml::actf::sigmoid = {
     [](flt x) -> flt {
-        return 1.0f / (1.0f + expf(-1.0f * x));
+        return 1.0f / (1.0f + std::exp(-1.0f * x));
     },
 
     [](flt x) -> flt {
@@ -27,7 +27,7 @@ value_type ml::actf::sigmoid = {
 
 value_type ml::actf::tanh = {
     [] (flt x) -> flt {
-        return tanhf(x);
+        return std::tanh(x);
     },
 
     [] (flt x) -> flt {

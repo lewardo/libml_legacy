@@ -14,7 +14,7 @@ using namespace ml::lossf;
  *  Accumulator function to simplify error calculation
  */
 
-[[maybe_unused]]
+[[ maybe_unused ]]
 flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {        
     if(a.size() != b.size()) return -1;  // return if mismatched sizes
 
@@ -44,7 +44,7 @@ value_type ml::lossf::mse = {
 
 value_type ml::lossf::mae = {
     [](flt x, flt t) -> flt {
-        return fabsf(t - x);
+        return fabs(t - x);
     },
 
     [](flt x, flt t) -> flt {
@@ -62,8 +62,8 @@ value_type ml::lossf::mae = {
 
 value_type ml::lossf::xee = {
     [](flt x, flt t) -> flt {
-        if(t == 1.0f) return -1.0f * logf(x);
-        return -1.0f * logf(1.0f - x);
+        if(t == 1.0f) return -1.0f * log(x);
+        return -1.0f * log(1.0f - x);
     },
 
     [](flt x, flt t) -> flt {
