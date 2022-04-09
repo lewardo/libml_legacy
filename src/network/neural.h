@@ -21,7 +21,7 @@ namespace ml::net {
 };
 
 namespace ml {
-    using namespace types;
+    using namespace ml::types;
     
     template <typename Ti, typename To>
     using network = net::network<Ti, To>;
