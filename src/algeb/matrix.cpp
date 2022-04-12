@@ -1,330 +1,327 @@
-#pragma once
-
 #include <cstdbool>
+#include <cstdint>
 #include <vector>
 #include <initializer_list>
-#include <functional>
-#include <numeric>
+#include <algorithm>
 #include <stdexcept>
 #include <execution>
-#include <utility>
 
 #include "types.h"
+#include "algeb.h"
+#include "utils.h"
 
-namespace std {
-    template<typename T>
-    using matrix = vector<vector<T>>;
+using namespace ml::types;
+
+namespace ml::types {
+    enum vector_class: uint32_t {
+        COL_VEC = 0,
+        ROW_VEC,
+    };
+
+    template <typename ...Args>
+    matrix repeat(const vector_class c, const uint32_t n, Args&&... args) {
+        vector v(std::forward<Args>(args)...);
+        matrix m(n, v);
+
+        if(c == COL_VEC) return transpose(m);
+        else return m;
+    }
+
+    template <typename ...Args>
+    matrix repeat(const vector_class c, const uint32_t n, std::initializer_list<flt> init, Args&&... args) {
+        vector v(std::forward<std::initializer_list<flt>> (init), std::forward<Args> (args)...);
+        matrix m(n, v);
+
+        if(c == COL_VEC) return transpose(m);
+        else return m;
+    }
+
+    bool verify(const matrix& m) {
+        const size_t size = m.front().size();
+        
+        return std::all_of(
+            std::execution::par,
+            m.begin() + 1, m.end(), 
+            [&size](const vector& v) {
+                return v.size();
+            }
+        );
+    }
+
+    matrix transpose(const matrix& term) {
+        if(not verify(term)) throw std::invalid_argument("matrix shape invalid");
+        
+        matrix transposed(term.front().size(), vector(term.size()));
+        
+        std::for_each(
+            std::execution::par, 
+            term.begin(), term.end(),
+            [&](const vector& row) {
+                typename matrix::difference_type row_n = c_cast<typename matrix::const_iterator>( &row ) - term.begin();
+                    
+                std::for_each(
+                    std::execution::par,
+                    row.begin(), row.end(),
+                    [&](const flt& val) {
+                        transposed[c_cast<typename vector::const_iterator> (&val) - row.begin()][row_n] = val;
+                    }
+                );
+            }
+        );
+        
+        return transposed;
+    };
 }
 
-namespace ml::types {
-    using direction_t = enum {
-        DIR_VERT = 0,
-        DIR_HORZ
-    };
+matrix operator+(const matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
 
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        vec.begin(), 
+        res.begin(), 
+        [](const vector& row, const flt& val) -> vector {
+            return row + val;
+        }
+    );
 
-    class matrix {
-        public:
-            template <typename ...Args>
-            matrix(Args&&... args):
-                _internal(std::forward<Args>(args)...),
-                _transposed(false) {}
-
-            template <typename ...Args>
-            matrix(std::initializer_list<flt> init, Args&&... args):
-                _internal(init, std::forward<Args>(args)...),
-                _transposed(false) {}
-
-            matrix(const std::matrix<flt>& init):
-                _internal(init),
-                _transposed(false) {};
-
-            matrix(const ml::types::matrix& init):
-                _internal(init),
-                _transposed(false) {};
-
-            matrix(ml::types::matrix&& init):
-                _internal(std::move(init._internal)),
-                _transposed(init._transposed) {};
-
-            ~matrix() = default;
-
-            matrix& operator=(const matrix& other) {
-                _internal = other._internal;
-                _transposed = _transposed;
-                
-                return *this;
-            };
-            
-            matrix& operator=(const std::matrix<flt>& m) {
-                _internal = m;
-                _transposed = false;
-                
-                return *this;
-            };
-
-            matrix& operator=(matrix&& other) {
-                _internal = std::move(other._internal),
-                _transposed = other._transposed;
-                
-                return *this;
-            };
-            
-            matrix& operator=(std::matrix<flt>&& m) {
-                _internal = std::move(m);
-                _transposed = false;
-                
-                return *this;
-            };
-
-            operator std::matrix<flt>() const {
-                return _internal;
-            };
-
-            matrix operator+(const flt& x) const {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current += val);
-                });
-                
-                return merged;
-            };
-            
-            matrix operator+(const std::matrix<flt>& other) const {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current += other_row);
-                });
-                
-                return merged;
-            };
-
-            matrix& operator+=(const flt& x) {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current += val);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-            
-            matrix& operator+=(const std::matrix<flt>& other) {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current += other_row);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-
-            matrix operator-(const flt& x) const {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current -= val);
-                });
-                
-                return merged;
-            };
-            
-            matrix operator-(const std::matrix<flt>& other) const {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current -= other_row);
-                });
-                
-                return merged;
-            };
-
-            matrix& operator-=(const flt& x) {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current -= val);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-            
-            matrix& operator-=(const std::matrix<flt>& other) {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current -= other_row);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-
-            matrix operator*(const flt& x) const {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current *= val);
-                });
-                
-                return merged;
-            };
-            
-            vector operator*(const std::vector<flt>& v) const {
-                std::matrix<flt> other = repeat(DIR_VERT, _internal.size(), v);
-                std::vector<flt> merged(_internal.size());
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> flt {
-                    vector current = std::move(row);
-                    
-                    return current * other_row;
-                });
-                
-                return merged;
-            };
-            
-            // matrix operator*(const std::matrix<flt>& other) const;
-
-            matrix operator&(const flt& x) {
-                return operator*(std::forward<const flt&> (x));
-            };
-            
-            matrix operator&(const std::matrix<flt>& other) const {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current &= other_row);
-                });
-                
-                return merged;
-            };
-
-            matrix& operator*=(const flt& x) {
-                std::matrix<flt> merged(_internal.size());
-                std::vector<flt> v(_internal[0].size(), x);
-                
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), v.begin(), merged.begin(), [](const std::vector<flt>& row, const flt& val) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current *= val);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-            
-            // matrix& operator*=(const std::matrix<flt>& other);
-            
-            matrix& operator&=(const flt& x) {
-                return operator*=(std::forward<const flt&> (x));
-            };
-            
-            matrix& operator&=(const std::matrix<flt>& other) {
-                if(_internal.size() != other.size() || _internal[0].size() != other[0].size()) throw std::length_error("operator+ matrix size mismatch");
-
-                std::matrix<flt> merged(_internal.size());
-                std::transform(std::execution::par, _internal.begin(), _internal.end(), other.begin(), merged.begin(), [](const std::vector<flt>& row, const std::vector<flt>& other_row) -> std::vector<flt> {
-                    vector current = std::move(row);
-                    
-                    return types::std(current &= other_row);
-                });
-                
-                _internal = std::move(merged);
-                
-                return *this;
-            };
-
-            matrix& operator~() {
-                _transposed ^= true;
-                
-                return *this;
-            };
-
-            vector& operator[](const unsigned int idx) const {
-                return c_cast<vector&> (_internal[idx]);
-            };
-
-            template <typename ...Args>
-            static matrix repeat(const direction_t d, const unsigned int n, Args&&... args) {
-                vector v(std::forward<Args>(args)...);
-                matrix m(n, v);
-                
-                if(d == DIR_HORZ) m._transposed ^= true;
-                
-                return m;
-            }
-            
-            template <typename ...Args>
-            static matrix repeat(const direction_t d, const unsigned int n, std::initializer_list<flt> init, Args&&... args) {
-                vector v(std::forward<std::initializer_list<flt>> (init), std::forward<Args> (args)...);
-                matrix m(n, v);
-                
-                if(d == DIR_HORZ) m._transposed ^= true;
-                
-                return m;
-            }
-
-            std::matrix<flt>& std() const {
-                return c_cast<std::matrix<flt>&> (_internal);
-            }
-
-        private:
-            /*
-             *  internal variables
-             */
-            
-            std::matrix<flt> _internal;
-            bool _transposed;
-    };
+    return res;
 };
 
-namespace ml::types {
-    /*
-     *  helper function to extract std::matrix
-     */
+matrix operator+(const matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator+ matrix size mismatch");
+
+    matrix res(lterm.size(), vector(lterm.front().size()));
     
-    [[maybe_unused]]
-    std::matrix<flt>& std(const matrix& m) {
-        return c_cast<matrix&> (m).std();
-    };
+    std::transform(
+        std::execution::par,
+        lterm.begin(), lterm.end(),
+        rterm.begin(), 
+        res.begin(),
+        [](const vector& lrow, const vector& rrow) -> std::vector<flt> {
+            return lrow + rrow;
+        }
+    );
+
+    return res;
 };
+
+matrix& operator+=(matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
+
+    std::transform(
+        std::execution::par,
+        lterm.begin(), lterm.end(),
+        vec.begin(),
+        res.begin(),
+        [](const vector& row, const flt& val) -> vector {
+            return row + val;
+        }
+    );
+
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+matrix& operator+=(matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator+ matrix size mismatch");
+
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        rterm.begin(), 
+        res.begin(), 
+        [](const vector& lrow, const vector& rrow) -> vector {
+            return lrow + rrow;
+        }
+    );
+
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+matrix operator-(const matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
+
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        vec.begin(), 
+        res.begin(), 
+        [](const vector& row, const flt& val) -> vector {
+            return row - val;
+        }
+    );
+
+    return res;
+};
+
+matrix operator-(const matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator+ matrix size mismatch");
+
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    
+    std::transform(
+        std::execution::par,
+        lterm.begin(), lterm.end(),
+        rterm.begin(), 
+        res.begin(),
+        [](const vector& lrow, const vector& rrow) -> std::vector<flt> {
+            return lrow - rrow;
+        }
+    );
+
+    return res;
+};
+
+matrix& operator-=(matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
+
+    std::transform(
+        std::execution::par,
+        lterm.begin(), lterm.end(),
+        vec.begin(),
+        res.begin(),
+        [](const vector& row, const flt& val) -> vector {
+            return row - val;
+        }
+    );
+
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+matrix& operator-=(matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator+ matrix size mismatch");
+
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        rterm.begin(), 
+        res.begin(), 
+        [](const vector& lrow, const vector& rrow) -> vector {
+            return lrow - rrow;
+        }
+    );
+
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+matrix operator*(const matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
+
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        vec.begin(), 
+        res.begin(), 
+        [](const vector& row, const flt& val) -> vector {
+            return row * val;
+        }
+    );
+
+    return res;
+};
+
+vector operator*(const matrix& lterm, const vector& rterm) {
+    matrix mat = ml::types::repeat(ROW_VEC, lterm.size(), rterm);
+    vector res(lterm.size());
+
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        mat.begin(), 
+        res.begin(), 
+        [](const vector& lrow, const vector& rrow) -> flt {
+            return lrow * rrow;
+        }
+    );
+
+    return res;
+};
+
+// matrix operator*(const matrix& lterm, const matrix& rterm) {
+// 
+// };
+
+matrix operator&(const matrix& lterm, const flt& rterm) {
+    return operator*(std::forward<const matrix&>(lterm), std::forward<const flt&>(rterm));
+};
+
+matrix operator&(const matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator& matrix size mismatch");
+
+    matrix res(lterm.size());
+    
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        rterm.begin(), 
+        res.begin(), 
+        [](const vector& lrow, const vector& rrow) -> vector {
+            return lrow & rrow;
+        }
+    );
+
+    return res;
+};
+
+matrix operator*=(matrix& lterm, const flt& rterm) {
+    matrix res(lterm.size(), vector(lterm.front().size()));
+    vector vec(lterm.front().size(), rterm);
+
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        vec.begin(), 
+        res.begin(), 
+        [](const vector& row, const flt& val) -> vector {
+            return row * val;
+        }
+    );
+    
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+matrix operator&=(matrix& lterm, const flt& rterm) {
+    return operator*=(std::forward<matrix&>(lterm), std::forward<const flt&>(rterm));
+};
+
+matrix operator&=(matrix& lterm, const matrix& rterm) {
+    if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator& matrix size mismatch");
+
+    matrix res(lterm.size());
+    
+    std::transform(
+        std::execution::par, 
+        lterm.begin(), lterm.end(), 
+        rterm.begin(), 
+        res.begin(), 
+        [](const vector& lrow, const vector& rrow) -> vector {
+            return lrow & rrow;
+        }
+    );
+    
+    lterm = std::move(res);
+
+    return lterm;
+};
+
+// matrix& operator*=(const std::matrix<flt>& other);
