@@ -16,20 +16,20 @@ using namespace ml::types;
  *  addition operations, returning new objects
  */
 
-vector operator+(const vector& first, const flt& x) {
-    vector merged(first.size()), second(first.size(), x);
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::plus<flt>());
+vector operator+(const vector& lterm, const flt& rterm) {
+    vector res(lterm.size()), vec(lterm.size(), rterm);
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::plus<flt>());
 
-    return merged;
+    return res;
 };
 
-vector operator+(const vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator+ vector size mismatch");
-    
-    vector merged(first.size());
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::plus<flt>());
+vector operator+(const vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator+ vector size mismatch");
 
-    return merged;
+    vector res(lterm.size());
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::plus<flt>());
+
+    return res;
 };
 
 
@@ -37,24 +37,24 @@ vector operator+(const vector& first, const vector& second) {
  *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
  */
 
-vector& operator+=(vector& first, const flt& x) {
-    vector merged(first.size()), second(first.size(), x);
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::plus<flt>());
-    
-    first = std::move(merged);
+vector& operator+=(vector& lterm, const flt& rterm) {
+    vector res(lterm.size()), vec(lterm.size(), rterm);
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::plus<flt>());
 
-    return first;
+    lterm = std::move(res);
+
+    return lterm;
 };
 
-vector& operator+=(vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator+= vector size mismatch");
+vector& operator+=(vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator+= vector size mismatch");
 
-    vector merged(first.size());
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::plus<flt>());
-    
-    first = std::move(merged);
+    vector res(lterm.size());
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::plus<flt>());
 
-    return first;
+    lterm = std::move(res);
+
+    return lterm;
 };
 
 
@@ -62,20 +62,20 @@ vector& operator+=(vector& first, const vector& second) {
  *  subtraction operations, returning new objects
  */
 
-vector operator-(const vector& first, const flt& x) {
-    vector merged(first.size()), second(first.size(), x);
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::minus<flt>());
+vector operator-(const vector& lterm, const flt& rterm) {
+    vector res(lterm.size()), vec(lterm.size(), rterm);
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::minus<flt>());
 
-    return merged;
+    return res;
 };
 
-vector operator-(const vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator- vector size mismatch");
-    
-    vector merged(first.size());
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::minus<flt>());
+vector operator-(const vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator- vector size mismatch");
 
-    return merged;
+    vector res(lterm.size());
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::minus<flt>());
+
+    return res;
 };
 
 
@@ -83,24 +83,24 @@ vector operator-(const vector& first, const vector& second) {
  *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
  */
 
-vector& operator-=(vector& first, const flt& x) {
-    vector merged(first.size()), second(first.size(), x);
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::minus<flt>());
-    
-    first = std::move(merged);
+vector& operator-=(vector& lterm, const flt& rterm) {
+    vector res(lterm.size()), vec(lterm.size(), rterm);
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::minus<flt>());
 
-    return first;
+    lterm = std::move(res);
+
+    return lterm;
 };
 
-vector& operator-=(vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator-= vector size mismatch");
+vector& operator-=(vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator-= vector size mismatch");
 
-    vector merged(first.size());
-    std::transform(std::execution::par, first.begin(), first.end(),second.begin(), merged.begin(), std::minus<flt>());
-    
-    first = std::move(merged);
-    
-    return first;
+    vector res(lterm.size());
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::minus<flt>());
+
+    lterm = std::move(res);
+
+    return lterm;
 };
 
 
@@ -108,31 +108,31 @@ vector& operator-=(vector& first, const vector& second) {
  *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
  */
 
-flt operator*(const vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator* vector size mismatch");
-    
-    return std::transform_reduce(std::execution::par, first.begin(), first.end(), second.begin(), 0.0f);
+flt operator*(const vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator* vector size mismatch");
+
+    return std::transform_reduce(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), 0.0f);
 };
 
 
-vector operator*(const vector& first, const flt& x) {
-    vector merged(first.size()), second(first.size(), x);
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::multiplies<flt>());
+vector operator*(const vector& lterm, const flt& rterm) {
+    vector res(lterm.size()), vec(lterm.size(), rterm);
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::multiplies<flt>());
 
-    return merged;
+    return res;
 };
 
-vector operator&(const vector& first, const vector& second) {
-    if(first.size() != second.size()) throw std::length_error("operator& vector size mismatch");
+vector operator&(const vector& lterm, const vector& rterm) {
+    if(lterm.size() != rterm.size()) throw std::length_error("operator& vector size mismatch");
 
-    vector merged(first.size());
-    std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::multiplies<flt>());
+    vector res(lterm.size());
+    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::multiplies<flt>());
 
-    return merged;
+    return res;
 };
 
-vector operator&(const vector& first, const flt& x) {
-    return first * x;
+vector operator&(const vector& lterm, const flt& rterm) {
+    return operator*(std::forward<const vector&> (lterm), std::forward<const flt&> (rterm));
 }
 
 
@@ -140,22 +140,22 @@ vector operator&(const vector& first, const flt& x) {
  *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
  */
 
- vector& operator*=(vector& first, const flt& x) {
-     vector merged(first.size()), second(first.size(), x);
-     std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::multiplies<flt>());
-     
-     first = std::move(merged);
+ vector& operator*=(vector& lterm, const flt& rterm) {
+     vector res(lterm.size()), vec(lterm.size(), rterm);
+     std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::multiplies<flt>());
 
-     return first;
+     lterm = std::move(res);
+
+     return lterm;
  };
 
- vector& operator&=(vector& first, const vector& second) {
-     if(first.size() != second.size()) throw std::length_error("operator&= vector size mismatch");
+ vector& operator&=(vector& lterm, const vector& rterm) {
+     if(lterm.size() != rterm.size()) throw std::length_error("operator&= vector size mismatch");
 
-     vector merged(first.size());
-     std::transform(std::execution::par, first.begin(), first.end(), second.begin(), merged.begin(), std::multiplies<flt>());
-     
-     first = std::move(merged);
+     vector res(lterm.size());
+     std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::multiplies<flt>());
 
-     return first;
+     lterm = std::move(res);
+
+     return lterm;
  };
