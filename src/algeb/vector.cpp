@@ -9,153 +9,231 @@
 #include "types.h"
 #include "algeb.h"
 
-using namespace ml::types;
-
-
 /*
- *  addition operations, returning new objects
+ *  vector operation definitions
+ *  
  */
 
-vector operator+(const vector& lterm, const flt& rterm) {
-    vector res(lterm.size()), vec(lterm.size(), rterm);
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::plus<flt>());
+namespace ml::types {
+     
+    /*
+     *  addition operations, returning new objects
+     */
 
-    return res;
-};
+    vector operator+(const vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::plus<flt>()
+        );
 
-vector operator+(const vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator+ vector size mismatch");
+        return res;
+    };
 
-    vector res(lterm.size());
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::plus<flt>());
+    vector operator+(const vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator+ vector size mismatch");
 
-    return res;
-};
+        vector res(lterm.size());
+        std::transform(std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::plus<flt>()
+        );
 
-
-/*
- *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
- */
-
-vector& operator+=(vector& lterm, const flt& rterm) {
-    vector res(lterm.size()), vec(lterm.size(), rterm);
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::plus<flt>());
-
-    lterm = std::move(res);
-
-    return lterm;
-};
-
-vector& operator+=(vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator+= vector size mismatch");
-
-    vector res(lterm.size());
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::plus<flt>());
-
-    lterm = std::move(res);
-
-    return lterm;
-};
+        return res;
+    };
 
 
-/*
- *  subtraction operations, returning new objects
- */
+    /*
+     *  plus-equals operations, returns reference to self after incrementation (elementwise and scalar)
+     */
 
-vector operator-(const vector& lterm, const flt& rterm) {
-    vector res(lterm.size()), vec(lterm.size(), rterm);
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::minus<flt>());
+    vector& operator+=(vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::plus<flt>()
+        );
 
-    return res;
-};
+        lterm = std::move(res);
 
-vector operator-(const vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator- vector size mismatch");
+        return lterm;
+    };
 
-    vector res(lterm.size());
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::minus<flt>());
+    vector& operator+=(vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator+= vector size mismatch");
 
-    return res;
-};
+        vector res(lterm.size());
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::plus<flt>()
+        );
 
+        lterm = std::move(res);
 
-/*
- *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
- */
-
-vector& operator-=(vector& lterm, const flt& rterm) {
-    vector res(lterm.size()), vec(lterm.size(), rterm);
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::minus<flt>());
-
-    lterm = std::move(res);
-
-    return lterm;
-};
-
-vector& operator-=(vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator-= vector size mismatch");
-
-    vector res(lterm.size());
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::minus<flt>());
-
-    lterm = std::move(res);
-
-    return lterm;
-};
+        return lterm;
+    };
 
 
-/*
- *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
- */
+    /*
+     *  subtraction operations, returning new objects
+     */
 
-flt operator*(const vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator* vector size mismatch");
+    vector operator-(const vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::minus<flt>()
+        );
 
-    return std::transform_reduce(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), 0.0f);
-};
+        return res;
+    };
+
+    vector operator-(const vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator- vector size mismatch");
+
+        vector res(lterm.size());
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::minus<flt>()
+        );
+
+        return res;
+    };
 
 
-vector operator*(const vector& lterm, const flt& rterm) {
-    vector res(lterm.size()), vec(lterm.size(), rterm);
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::multiplies<flt>());
+    /*
+     *  minus-equals operations, returns reference to self after decrementation (elementwise and scalar)
+     */
 
-    return res;
-};
+    vector& operator-=(vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::minus<flt>()
+        );
 
-vector operator&(const vector& lterm, const vector& rterm) {
-    if(lterm.size() != rterm.size()) throw std::length_error("operator& vector size mismatch");
+        lterm = std::move(res);
 
-    vector res(lterm.size());
-    std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::multiplies<flt>());
+        return lterm;
+    };
 
-    return res;
-};
+    vector& operator-=(vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator-= vector size mismatch");
 
-vector operator&(const vector& lterm, const flt& rterm) {
-    return operator*(std::forward<const vector&> (lterm), std::forward<const flt&> (rterm));
+        vector res(lterm.size());
+        std::transform(std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::minus<flt>()
+        );
+
+        lterm = std::move(res);
+
+        return lterm;
+    };
+
+
+    /*
+     *  multiplication operations: scalar product, dot product and hadamarand (elementwise) product respectively
+     */
+
+    flt operator*(const vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator* vector size mismatch");
+
+        return std::transform_reduce(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            0.0f
+        );
+    };
+
+
+    vector operator*(const vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(
+            std::execution::par_unseq,
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::multiplies<flt>()
+        );
+
+        return res;
+    };
+
+    vector operator&(const vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator& vector size mismatch");
+
+        vector res(lterm.size());
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::multiplies<flt>()
+        );
+
+        return res;
+    };
+
+    vector operator&(const vector& lterm, const flt& rterm) {
+        return lterm * rterm;
+    }
+
+
+    /*
+     *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
+     */
+
+    vector& operator*=(vector& lterm, const flt& rterm) {
+        vector res(lterm.size()), vec(lterm.size(), rterm);
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            vec.begin(), 
+            res.begin(), 
+            std::multiplies<flt>()
+        );
+
+        lterm = std::move(res);
+
+        return lterm;
+    };
+
+    vector& operator&=(vector& lterm, const vector& rterm) {
+        if(lterm.size() != rterm.size()) throw std::length_error("operator&= vector size mismatch");
+
+        vector res(lterm.size());
+        std::transform(
+            std::execution::par_unseq, 
+            lterm.begin(), lterm.end(), 
+            rterm.begin(), 
+            res.begin(), 
+            std::multiplies<flt>()
+        );
+
+        lterm = std::move(res);
+
+        return lterm;
+    };
 }
-
-
-/*
- *  times-equals operations: scalar product and hadamarand (elementwise) product respectively
- */
-
- vector& operator*=(vector& lterm, const flt& rterm) {
-     vector res(lterm.size()), vec(lterm.size(), rterm);
-     std::transform(std::execution::par, lterm.begin(), lterm.end(), vec.begin(), res.begin(), std::multiplies<flt>());
-
-     lterm = std::move(res);
-
-     return lterm;
- };
-
- vector& operator&=(vector& lterm, const vector& rterm) {
-     if(lterm.size() != rterm.size()) throw std::length_error("operator&= vector size mismatch");
-
-     vector res(lterm.size());
-     std::transform(std::execution::par, lterm.begin(), lterm.end(), rterm.begin(), res.begin(), std::multiplies<flt>());
-
-     lterm = std::move(res);
-
-     return lterm;
- };
