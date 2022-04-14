@@ -7,25 +7,28 @@
 
 ### compiler/linker and archiver ###
 # compiler/linker
-CPP				:= g++-11
+CXX				:= g++-11
 # archiver
 AR				:= ar
 
 ### directory names ###
+PREFIX			?= /usr/local
 # source code directory
 SRCDIR			?= ./src
 # header file directory
 INCDIR			?= ./include
 # development build directory
-BUILDDIR		?= ./build
+BUILDDIR		?= $(if $(TMPDIR),$(realpath $(TMPDIR)),/var/tmp)/$(notdir $(CURDIR))_build
 # object file directory
 OBJDIR			:= $(BUILDDIR)/obj
 # dependency file directory
 DEPDIR			:= $(BUILDDIR)/deps
+# library generation output directory
+LIBDIR			:= $(BUILDDIR)/lib
 # install library directory
-ILIBDIR			?= /usr/local/lib
+ILIBDIR			?= $(PREFIX)/lib
 # install library includes' directory
-IINCDIR			?= /usr/local/include
+IINCDIR			?= $(PREFIX)/include
 
 ### file names ###
 # name of built development executable
@@ -47,7 +50,6 @@ HDRS			:= $(shell find $(INCDIR) -name '*.h')
 # to shorten .o target dependencies
 VPATH			:= $(dir $(SRCS))
 # all paths in src directory to shorten includes
-# export CPATH	:= $(shell find $(SRCDIR) -type d | tr '\n' ':' | sed 's/:$$//')
 export CPATH	:= $(INCDIR)
 
 ### command line parameters to change behaviour ###
@@ -60,7 +62,7 @@ MULTILINE 		?= 1
 
 ### compiler/linker flags ###
 # compiler flags, with options
-CXXFLAGS 		+= -std=$(STD) -Wall -Werror -O$(OPTIMISE)
+CXXFLAGS 		+= -std=$(STD) -Wall -Wextra -Werror -O$(OPTIMISE)
 # linker flags, link libmath
 LDFLAGS  		+= -lm
 
@@ -96,7 +98,7 @@ endif
 
 ### target attributes ###
 # phony targets [all, run, build, rebuild, dev, clear] for development, [install, uninstall] for installation
-.PHONY: all build rebuild run install uninstall clear _move _includes
+.PHONY: all build rebuild run install uninstall clear _move
 # run all following targets silently
 .SILENT:
 
@@ -116,20 +118,26 @@ run: $(EXE)
 	$(EXE)
 
 # install libraries to directoies 
-install: $(LIBNAME).a $(LIBNAME).so _includes
+install: $(LIBNAME).a $(LIBNAME).so $(HDRS) | $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME)
+	$(ECHO) "installing to $(ILIBDIR) and $(IINCDIR)"
+	sudo mv $(LIBDIR)/$(LIBNAME).{a,so} $(ILIBDIR)
+	
+	sudo cp $(LIBHDR) $(IINCDIR)
+	sudo cp $(HDRS) $(IINCDIR)/$(LIBNAME)
+	
 	$(NOPECHO) "$(LIBNAME) successfully installed"
 
 # remove libraries and includes, delete directories if empty
 uninstall:
 	$(ECHO) "uninstalling $(ILIBDIR)/$(LIBNAME) shared and static libraries"
-	[ ! -f $(ILIBDIR)/$(LIBNAME).a ] || rm $(ILIBDIR)/$(LIBNAME).a
-	[ ! -f $(ILIBDIR)/$(LIBNAME).so ] || rm $(ILIBDIR)/$(LIBNAME).so
-	[ ! -z "$$(ls -A $(ILIBDIR))" ] || rmdir $(ILIBDIR)
+	[ ! -f $(ILIBDIR)/$(LIBNAME).a ] || sudo rm $(ILIBDIR)/$(LIBNAME).a
+	[ ! -f $(ILIBDIR)/$(LIBNAME).so ] || sudo rm $(ILIBDIR)/$(LIBNAME).so
+	[ ! -z "$$(ls -A $(ILIBDIR))" ] || sudo rmdir $(ILIBDIR)
 	
 	$(ECHO) "uninstalling $(IINCDIR)/$(LIBHDR) and corresponding includes"
-	[ ! -f $(IINCDIR)/$(LIBHDR) ] || rm $(IINCDIR)/$(LIBHDR)
-	[ ! -d $(IINCDIR)/$(LIBNAME) ] || rm -rf $(IINCDIR)/$(LIBNAME)
-	[ ! -z "$$(ls -A $(IINCDIR))" ] || rmdir $(IINCDIR)
+	[ ! -f $(IINCDIR)/$(LIBHDR) ] || sudo rm $(IINCDIR)/$(LIBHDR)
+	[ ! -d $(IINCDIR)/$(LIBNAME) ] || sudo rm -rf $(IINCDIR)/$(LIBNAME)
+	[ ! -z "$$(ls -A $(IINCDIR))" ] || sudo rmdir $(IINCDIR)
 
 # delete build directory
 clean: _move
@@ -139,36 +147,30 @@ clean: _move
 # development executable from object files
 $(EXE): $(OBJS) $(OBJDIR)/main.o
 	$(ECHO) "linking \033[4m$@\033[0m"
-	$(CPP) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) -o $@ $^
 
 # object file from corresponding source file
 $(OBJDIR)/%.o: %.cpp | $(OBJDIR) $(DEPDIR)
 	$(ECHO) "building \033[4m$@\033[0m"
-	$(CPP) $(CXXFLAGS) -c -fPIC -MMD -MF $(DEPDIR)/$(shell echo $@ | xargs -L 1 basename | sed 's/o$$/d/') -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -fPIC -MMD -MF $(DEPDIR)/$(shell echo $@ | xargs -L 1 basename | sed 's/o$$/d/') -o $@ $<
 
 # static archive library creation
-$(LIBNAME).a: $(OBJS) | $(ILIBDIR)
+$(LIBNAME).a: $(OBJS) | $(LIBDIR)
 	$(ECHO) "generating static library archive $(LIBNAME).a"
-	$(AR) rcs $(ILIBDIR)/$@ $^
+	$(AR) rcs $(LIBDIR)/$@ $^
 
 # shared library creation
-$(LIBNAME).so: $(OBJS) | $(ILIBDIR)
+$(LIBNAME).so: $(OBJS) | $(LIBDIR)
 	$(ECHO) "generating shared library $(LIBNAME).so"
-	$(CPP) -shared -o $(ILIBDIR)/$@ $^
+	$(CXX) -shared -o $(LIBDIR)/$@ $^
 
 # directory creation
-$(BUILDDIR) $(OBJDIR) $(DEPDIR) $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME):
+$(BUILDDIR) $(OBJDIR) $(DEPDIR) $(LIBDIR) $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME):
 	mkdir -p $@
 
 # move the build directory so the target couting works properly
 _move:
 	[ ! -d $(BUILDDIR) ] || mv $(BUILDDIR){,_}
-
-# copy include headers in includepath
-_includes: $(HDRS) | $(IINCDIR) $(IINCDIR)/$(LIBNAME)
-	$(ECHO) "moving headers to $(IINCDIR)/$(LIBNAME)"
-	cp $(LIBHDR) $(IINCDIR)
-	cp $^ $(IINCDIR)/$(LIBNAME)
 
 # include source dependecies to recompile when changed
 -include $(DEPDIR)/*.d
