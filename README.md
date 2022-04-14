@@ -5,17 +5,18 @@
 + network abstact class
 + actfunc and lossfunc namespaces
 + vector wrapper
-### TODOS:
 + linear algebra framework
+### TODOS:
 + Corpus object to import data from files
-+ compatibility for training with corpus object for Network inheritors
++ reader and writer binary streams for saving/loading
++ compatibility for training with corpus object for class Network inheritors
 + autoencoder template to create an autoencoder from any Network inheritor
 ### future additions:
 + an RNN, LSTM, GRU
 + CNN
 + KNN
 + k-means training, SGD, BGD
-+ AdaM and various optimisers
++ AdaM, AdaGrad and other optimisers
 
 ---
 ```shell
