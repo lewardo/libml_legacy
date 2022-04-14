@@ -14,16 +14,18 @@ AR				:= ar
 ### directory names ###
 # source code directory
 SRCDIR			?= ./src
+# header file directory
+INCDIR			?= ./include
 # development build directory
-BUILDDIR		:= ./build
-# install library directory (change to /usr/local/lib)
-ILIBDIR			?= ./lib
-# install library includes' directory (change to /usr/local/include)
-IINCDIR			?= ./include
+BUILDDIR		?= ./build
 # object file directory
 OBJDIR			:= $(BUILDDIR)/obj
 # dependency file directory
 DEPDIR			:= $(BUILDDIR)/deps
+# install library directory
+ILIBDIR			?= /usr/local/lib
+# install library includes' directory
+IINCDIR			?= /usr/local/include
 
 ### file names ###
 # name of built development executable
@@ -39,13 +41,14 @@ SRCS			:= $(shell find $(SRCDIR) -name '*.cpp')
 # sources' respective object files
 OBJS			:= $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
 # header files to be included
-HDRS			:= $(shell find $(SRCDIR) -name '*.h')
+HDRS			:= $(shell find $(INCDIR) -name '*.h')
 
 ### path variables for make and the compiler respectively ###
 # to shorten .o target dependencies
 VPATH			:= $(dir $(SRCS))
 # all paths in src directory to shorten includes
-export CPATH	:= $(shell find $(SRCDIR) -type d | tr '\n' ':' | sed 's/:$$//')
+# export CPATH	:= $(shell find $(SRCDIR) -type d | tr '\n' ':' | sed 's/:$$//')
+export CPATH	:= $(INCDIR)
 
 ### command line parameters to change behaviour ###
 # c++ version
