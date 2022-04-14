@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ $(command -v git) ]]
+if [[ $(command -v git) ]] && [[ $(command -v sudo) ]] && [[ $(command -v make) ]]
 then
-    if [ -w $TMPDIR ] 
-    then DIR=$TMPDIR/libml
-    else DIR=/var/tmp/libml
-    fi
+    export DIR = ${TMPDIR:-/var/tmp/}
     
     mkdir -p $DIR
     
