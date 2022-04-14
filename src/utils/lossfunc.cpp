@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <stdexcept>
 #include <numeric>
 
 #include "algeb.h"
@@ -16,7 +17,7 @@ using namespace ml::lossf;
 
 [[ maybe_unused ]]
 flt ml::lossf::accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {        
-    if(a.size() != b.size()) return -1;  // return if mismatched sizes
+    if(a.size() != b.size()) throw std::invalid_argument("accumulate vector size mismatch");  // throw if mismatched sizes
 
     return std::transform_reduce(std::execution::par_unseq, a.begin(), a.end(), b.begin(), 0.0f, std::plus<flt>(), f);
 };
@@ -44,7 +45,7 @@ value_type ml::lossf::mse = {
 
 value_type ml::lossf::mae = {
     [](flt x, flt t) -> flt {
-        return fabs(t - x);
+        return std::abs(t - x);
     },
 
     [](flt x, flt t) -> flt {
@@ -62,8 +63,8 @@ value_type ml::lossf::mae = {
 
 value_type ml::lossf::xee = {
     [](flt x, flt t) -> flt {
-        if(t == 1.0f) return -1.0f * log(x);
-        return -1.0f * log(1.0f - x);
+        if(t == 1.0f) return -1.0f * std::log(x);
+        return -1.0f * std::log(1.0f - x);
     },
 
     [](flt x, flt t) -> flt {
