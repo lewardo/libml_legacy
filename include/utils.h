@@ -16,6 +16,11 @@ namespace ml::utils {
         return static_cast<dT>( static_cast<iT>(&element) - container.begin() );
     };
     
+    template <typename T>
+    struct default_value {
+        static constexpr typename std::decay_t<T> value = std::decay_t<T>{};
+    };
+    
     class reader {
         public:
             reader& operator>>(vector&) const;
