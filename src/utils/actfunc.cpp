@@ -62,7 +62,7 @@ value_type ml::actf::linear = {
         return x;
     },
 
-    [] (flt x) -> flt {
+    [] (flt) -> flt {
         return 1.0f;
     }
 };
