@@ -13,7 +13,7 @@
 using namespace ml::utils;
 
 namespace ml::types {
-    bool verify(const matrix& m) {
+    bool verify_matrix(const matrix& m) {
         const size_t size = m.front().size();
         
         return std::all_of(
@@ -24,9 +24,9 @@ namespace ml::types {
             }
         );
     }
-
-    matrix transpose(const matrix& term) {
-        if(not verify(term)) throw std::invalid_argument("matrix shape invalid");
+    
+    matrix transpose_of(const matrix& term) {
+        if(not verify_matrix(term)) throw std::invalid_argument("matrix shape invalid");
         
         matrix transposed(term.front().size(), vector(term.size()));
         
@@ -76,7 +76,7 @@ namespace ml::types {
             lterm.begin(), lterm.end(),
             rterm.begin(), 
             res.begin(),
-            [](const vector& lrow, const vector& rrow) -> std::vector<flt> {
+            [](const vector& lrow, const vector& rrow) -> vector {
                 return lrow + rrow;
             }
         );
@@ -233,9 +233,23 @@ namespace ml::types {
         return res;
     };
 
-    // matrix operator*(const matrix& lterm, const matrix& rterm) {
-    // 
-    // };
+    matrix operator*(const matrix& lterm, const matrix& rterm) {
+        if(lterm.front().size() != rterm.size()) throw std::invalid_argument("matrix operator* size mismatch");
+        if(not verify_matrix(lterm) || not verify_matrix(rterm)) throw std::invalid_argument("matrix not rectangular");
+        
+        matrix res(rterm.front().size()), t_rterm = transpose_of(rterm);
+        
+        std::transform(
+            std::execution::par_unseq,
+            t_rterm.begin(), t_rterm.end(),
+            res.begin(),
+            [&lterm](const vector& row) -> vector {
+                return lterm * row;
+            }
+        );
+        
+        return transpose_of(res);
+    };
 
     matrix operator&(const matrix& lterm, const flt& rterm) {
         return lterm * rterm;
@@ -259,7 +273,7 @@ namespace ml::types {
         return res;
     };
 
-    matrix operator*=(matrix& lterm, const flt& rterm) {
+    matrix& operator*=(matrix& lterm, const flt& rterm) {
         matrix res(lterm.size(), vector(lterm.front().size()));
         vector vec(lterm.front().size(), rterm);
 
@@ -278,11 +292,11 @@ namespace ml::types {
         return lterm;
     };
 
-    matrix operator&=(matrix& lterm, const flt& rterm) {
+    matrix& operator&=(matrix& lterm, const flt& rterm) {
         return lterm *= rterm;
     };
 
-    matrix operator&=(matrix& lterm, const matrix& rterm) {
+    matrix& operator&=(matrix& lterm, const matrix& rterm) {
         if(lterm.size() != rterm.size() || lterm.front().size() != rterm.front().size()) throw std::length_error("operator& matrix size mismatch");
 
         matrix res(lterm.size());
@@ -302,5 +316,24 @@ namespace ml::types {
         return lterm;
     };
     
-    // matrix& operator*=(const std::matrix<flt>& other);
+    matrix& operator*=(matrix& lterm, const matrix& rterm) {
+        if(not verify_matrix(lterm) || not verify_matrix(rterm)) throw std::invalid_argument("matrix not rectangular");
+        if(lterm.front().size() != rterm.size()) throw std::invalid_argument("matrix operator* size mismatch");
+        if(rterm.front().size() != rterm.size()) throw std::invalid_argument("rterm of matrix *= must be a square matrix");
+        
+        matrix res(rterm.front().size()), t_rterm = transpose_of(rterm);
+        
+        std::transform(
+            std::execution::par_unseq, 
+            t_rterm.begin(), t_rterm.end(),
+            res.begin(),
+            [&lterm](const vector& row) -> vector {
+                return lterm * row;
+            }
+        );
+        
+        lterm = std::move(transpose_of(res));
+        
+        return lterm;
+    };
 }
