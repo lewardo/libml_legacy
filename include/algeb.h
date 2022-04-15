@@ -67,8 +67,8 @@ namespace ml::types {
         }
     }
     
-    matrix transpose(const matrix&);
-    bool verify(const matrix&);
+    matrix transpose_of(const matrix&);
+    bool verify_matrix(const matrix&);
 
     /*
      *  addition defintions
@@ -120,13 +120,14 @@ namespace ml::types {
 
     matrix operator*(const matrix&, const flt&);
     vector operator*(const matrix&, const vector&);
+    matrix operator*(const matrix&, const matrix&);
 
     /*
      *  elementwise (hadamarand) product defintions
      */
 
-    vector operator&(const vector&, const vector&);
     vector operator&(const vector&, const flt&);
+    vector operator&(const vector&, const vector&);
 
     matrix operator&(const matrix&, const flt&);
     matrix operator&(const matrix&, const matrix&);
@@ -138,7 +139,8 @@ namespace ml::types {
     vector& operator*=(vector&, const flt&);
     vector& operator&=(vector&, const vector&);
 
-    matrix operator*=(matrix&, const flt&);
-    matrix operator&=(matrix&, const flt&);
-    matrix operator&=(matrix&, const matrix&);
+    matrix& operator*=(matrix&, const flt&);
+    matrix& operator*=(matrix&, const matrix&);
+    matrix& operator&=(matrix&, const flt&);
+    matrix& operator&=(matrix&, const matrix&);
 };
