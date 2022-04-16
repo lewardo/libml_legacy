@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+function print_command_available {
+    [ ! $(command -v $1) ] && echo -n " ✘ " || echo -n " ✔ " && echo $1
+}
+
 if [[ $(command -v git) ]] && [[ $(command -v sudo) ]] && [[ $(command -v make) ]]
 then
     DIR=${TMPDIR:-/var/tmp/}/libml
@@ -14,7 +18,8 @@ then
     rm -rf $DIR
 else
     echo "pls install dependencies and retry"
-    [ ! $(command -v git) ] && echo -e "\t✘ git" || echo -e "\t✔ git"
-    [ ! $(command -v sudo) ] && echo -e "\t✘ sudo" || echo -e "\t✔ sudo"
-    [ ! $(command -v make) ] && echo -e "\t✘ make" || echo -e "\t✔ make"
+    
+    for dep in "git" "sudo" "make"; do
+        print_command_available $dep
+    done
 fi
