@@ -18,24 +18,7 @@ namespace ml::corpus {
             virtual ~base_type() = default;
 
             virtual T operator[](const int&) = 0;
-
         protected:
             std::vector<std::array<flt, N>> _data;
     };
-    // 
-    // 
-    // class set :public base<flt> {
-    //     public:
-    //         using base<flt>::base;
-    // 
-    //         flt operator [](const int&) override;
-    // };
-    // 
-    // 
-    // class map :public base<dflt> {
-    //     public:
-    //         map(std::string);
-    // 
-    //         dflt operator [](const int&) override;
-    // };
 }
