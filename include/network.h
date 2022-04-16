@@ -7,7 +7,8 @@
 #include "neural.h"
 #include "actfunc.h"
 #include "lossfunc.h"
-#include "params.h"
+#include "types.h"
+#include "utils.h"
 
 /*
  * Network abstract class that will be inherited by all the network objects
@@ -16,7 +17,7 @@
  *
  */
 
-template <typename it, typename ot>
+template <typename iT, typename oT>
 class ml::net::network {
     public:
 
@@ -35,9 +36,9 @@ class ml::net::network {
          *      > predicting will return an error code, usually 0 for success and >0 for an error
          */
 
-        virtual flt propagate(const std::vector<it> &data, const std::vector<ot> &target, metadata_t params) = 0;
-        virtual int calculate(const std::vector<it> &data, std::vector<ot> &output) = 0;
-        virtual int update(metadata_t params) = 0;
+        virtual flt propagate(const std::vector<iT>&, const std::vector<oT>&) = 0;
+        virtual int calculate(const std::vector<iT>&, std::vector<oT>&) = 0;
+        virtual int update() = 0;
 
 
         /*
@@ -45,10 +46,10 @@ class ml::net::network {
          *  enables later saving and loading from drive
          */
 
-        virtual int load(const std::string src) = 0;
-        virtual int save(const std::string src) = 0;
+        virtual int load(const std::string) = 0;
+        virtual int save(const std::string) = 0;
 
     protected:
         /* variable to tell whether it has been initialised */
-        bool initialised = false;
+        bool _initialised = false;
 };
