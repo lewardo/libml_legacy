@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <utility>
 #include <functional>
 #include <execution>
 
@@ -38,6 +39,14 @@ namespace ml::lossf {
          */
 
         std::function<flt (flt, flt)> df;
+        
+        /*
+         *  utility to create pair with (a, b)
+         */
+         
+        std::pair<value_type, value_type> operator,(value_type& r) {
+            return std::make_pair(*this, r);
+        }
     };
 
 
