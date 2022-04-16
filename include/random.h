@@ -11,6 +11,8 @@
 constexpr const double RAND_COEFF = RAND_MAX / 2;
 
 namespace ml::internal::random {
+    using namespace types;
+    
     template <typename T> requires std::convertible_to<T, flt>
     void generate(T& value) {
         [[ maybe_unused ]]
