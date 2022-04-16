@@ -7,7 +7,7 @@
 #include "types.h"
 #include "utils.h"
 
-namespace ml::types {
+namespace ml::internal::types {
     enum vector_class {
         COL_VEC = 0,
         ROW_VEC,
@@ -31,7 +31,7 @@ namespace ml::types {
                     std::execution::par_unseq,
                     m.begin(), m.end(),
                     [&](vector& row) {                        
-                        row.resize(n, v[ml::utils::iterator_index(row, m)]);
+                        row.resize(n, v[ml::internal::utils::iterator_index(row, m)]);
                     }
                 );
                 
@@ -58,7 +58,7 @@ namespace ml::types {
                     std::execution::par_unseq,
                     m.begin(), m.end(),
                     [&](vector& row) {                        
-                        row.resize(n, v[ml::utils::iterator_index(row, m)]);
+                        row.resize(n, v[ml::internal::utils::iterator_index(row, m)]);
                     }
                 );
                 

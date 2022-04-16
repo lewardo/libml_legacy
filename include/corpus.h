@@ -2,41 +2,40 @@
 
 #include <cstdbool>
 #include <vector>
+#include <variant>
 #include <initializer_list>
 
 #include "types.h"
 
-namespace Corpus {
-    using namespace mltypes;
+namespace ml::corpus {
+    using namespace internal::types;
 
-    template <typename t>
-    class base {
+    template <int N>
+    class base_type {
         public:
-            base(std::string);
-            base(std::initializer_list<t>);
+            base_type(std::string);
 
-            virtual ~base() = default;
+            virtual ~base_type() = default;
 
-            virtual t operator [](const i32& idx) = 0;
+            virtual T operator[](const int&) = 0;
 
         protected:
-            std::vector<t> data;
+            std::vector<std::array<flt, N>> _data;
     };
-
-
-    class set :public base<f32> {
-        public:
-            using base<f32>::base;
-
-            f32 operator [](const i32&) override;
-    };
-
-
-    class map :public base<df32> {
-        public:
-            map(std::string);
-            map(std::initializer_list<df32>);
-
-            df32 operator [](const i32&) override;
-    };
+    // 
+    // 
+    // class set :public base<flt> {
+    //     public:
+    //         using base<flt>::base;
+    // 
+    //         flt operator [](const int&) override;
+    // };
+    // 
+    // 
+    // class map :public base<dflt> {
+    //     public:
+    //         map(std::string);
+    // 
+    //         dflt operator [](const int&) override;
+    // };
 }

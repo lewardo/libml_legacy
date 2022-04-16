@@ -2,7 +2,7 @@
 
 #include "actfunc.h"
 
-using namespace ml::types;
+using namespace ml::internal::types;
 using namespace ml::actf;
 
 

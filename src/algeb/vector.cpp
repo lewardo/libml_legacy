@@ -14,7 +14,7 @@
  *  
  */
 
-namespace ml::types {
+namespace ml::internal::types {
      
     /*
      *  addition operations, returning new objects

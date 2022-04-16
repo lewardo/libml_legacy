@@ -16,7 +16,7 @@ namespace ml::actf {
      *  using declarations
      */
 
-    using namespace ml::types;
+    using namespace internal::types;
 
 
     /*

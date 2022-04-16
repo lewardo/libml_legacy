@@ -8,8 +8,8 @@
 
 #include "types.h"
 
-namespace ml::utils {
-    using namespace ml::types;
+namespace ml::internal::utils {
+    using namespace types;
     
     template <typename T, typename vT = T::value_type, typename dT = T::difference_type, typename iT = T::const_iterator> requires std::ranges::range<T>
     inline dT iterator_index(vT& element, T& container) {
@@ -18,26 +18,6 @@ namespace ml::utils {
     
     template <typename T>
     struct default_value {
-        static constexpr typename std::decay_t<T> value = std::decay_t<T>{};
+        static constexpr typename std::decay_t<T> value = std::decay_t<T> {};
     };
-    
-    class reader {
-        public:
-            reader& operator>>(vector&) const;
-            reader& operator>>(matrix&) const;
-            
-            std::type_info& typeof_next() const;
-            
-        private:
-            std::ifstream _ifs;
-    };
-    
-    class writer {
-        public:
-            writer& operator<<(const vector&) const;
-            writer& operator<<(const matrix&) const;
-                        
-        private:
-            std::ofstream _ofs;
-    };
-};
+}

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <cstdint>
-#include <concepts>
 #include <vector>
 #include <array>
 
@@ -10,7 +9,7 @@ T c_cast(auto&& o) {
     return ((T) (o));
 };
 
-namespace ml::types {
+namespace ml::internal::types {
     using flt = float;  // or a double if you want a global change
     
     using vector = std::vector<flt>;

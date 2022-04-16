@@ -10,9 +10,9 @@
 #include "algeb.h"
 #include "utils.h"
 
-using namespace ml::utils;
+using namespace ml::internal::utils;
 
-namespace ml::types {
+namespace ml::internal::types {
     bool verify_matrix(const matrix& m) {
         const size_t size = m.front().size();
         
@@ -217,7 +217,7 @@ namespace ml::types {
     vector operator*(const matrix& lterm, const vector& rterm) {
         if(lterm.front().size() != rterm.size()) throw std::length_error("matrix vector multipliciation size mismatch");
         
-        matrix mat = ml::types::repeat(ROW_VEC, lterm.size(), rterm);
+        matrix mat = ml::internal::types::repeat(ROW_VEC, lterm.size(), rterm);
         vector res(lterm.size());
 
         std::transform(

@@ -8,7 +8,7 @@
 #include "algeb.h"
 #include "lossfunc.h"
 
-using namespace ml::types;
+using namespace ml::internal::types;
 using namespace ml::lossf;
 
 /*

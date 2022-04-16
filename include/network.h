@@ -18,7 +18,7 @@
  */
 
 template <typename iT, typename oT>
-class ml::net::network {
+class ml::networks::base_type {
     public:
 
         /*
@@ -26,7 +26,7 @@ class ml::net::network {
          *  set to default as there is nothing to deinit
          */
 
-        virtual ~network() = default;
+        virtual ~base_type() = default;
 
 
         /*
