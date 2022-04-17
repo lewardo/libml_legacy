@@ -10,13 +10,16 @@
 #include "algeb.h"
 #include "utils.h"
 
-using namespace ml::internal::utils;
-
-namespace ml::internal::types {
+namespace ml::internal::types::detail {
+    
+    /*
+     *  find first consecutive pair of sizes that don't match
+     */
+     
     bool verify_matrix(const matrix& m) {
         const size_t size = m.front().size();
         
-        return std::all_of(
+        return std::all_of (
             std::execution::par_unseq,
             m.begin() + 1, m.end(), 
             [&size](const vector& v) -> decltype(v.size()) {
@@ -25,18 +28,23 @@ namespace ml::internal::types {
         );
     }
     
+    
+    /*
+     *  find transpose of matrix in parallel, O(n) size for matrix size, as it basically copy constructs to another matrix;
+     */
+    
     matrix transpose_of(const matrix& term) {
         if(not verify_matrix(term)) throw std::invalid_argument("matrix shape invalid");
         
         matrix transposed(term.front().size(), vector(term.size()));
         
-        std::for_each(
+        std::for_each (
             std::execution::par_unseq, 
             term.begin(), term.end(),
             [&](const vector& row) {
                 auto row_n = iterator_index(row, term);
                     
-                std::for_each(
+                std::for_each (
                     std::execution::par_unseq,
                     row.begin(), row.end(),
                     [&](const flt& val) {
@@ -48,7 +56,14 @@ namespace ml::internal::types {
         
         return transposed;
     };
+};
 
+
+/*
+ *  namespace types
+ */
+
+namespace ml::internal::types {
     matrix operator+(const matrix& lterm, const flt& rterm) {
         matrix res(lterm.size(), vector(lterm.front().size()));
         vector vec(lterm.front().size(), rterm);
@@ -217,7 +232,7 @@ namespace ml::internal::types {
     vector operator*(const matrix& lterm, const vector& rterm) {
         if(lterm.front().size() != rterm.size()) throw std::length_error("matrix vector multipliciation size mismatch");
         
-        matrix mat = ml::internal::types::repeat(ROW_VEC, lterm.size(), rterm);
+        matrix mat = repeat(ROW_VEC, lterm.size(), rterm);
         vector res(lterm.size());
 
         std::transform(
