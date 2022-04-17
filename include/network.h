@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include <vector>
+#include <concepts>
 #include <string>
+#include <memory>
 
 #include "types.h"
 
@@ -20,6 +22,30 @@ namespace ml::networks {
         using namespace internal::types;
 
 
+        template <typename iT, typename oT>
+        class base_impl {
+            public:
+                using input_type = iT;
+                using output_type = oT;
+                
+                virtual ~base_impl() = default;
+                
+                virtual flt propagate_values(const input_type&, output_type&) = 0;
+                virtual int calculate_update(const input_type&, output_type&) = 0;
+                virtual int execute_update() = 0;
+        
+                virtual int load_parameters(const std::string) = 0;
+                virtual int save_parameters(const std::string) const = 0;
+            protected:
+                bool _initialised = false;
+        };
+        
+        template <class Impl>
+        concept generic_impl = std::derived_from<Impl, base_impl<typename Impl::input_type, typename Impl::output_type>> && requires {
+            typename Impl::input_type;
+            typename Impl::output_type;
+        };
+
         /*
          * Network abstract class that will be inherited by all the network objects
          *
@@ -27,13 +53,18 @@ namespace ml::networks {
          *
          */
 
-        template <typename iT, typename oT>
+        template <class Impl> requires generic_impl<Impl>
         class base_type {
             public:
+                using input_type = Impl::input_type;
+                using output_type = Impl::output_type;
+                
+                template <typename... Args>  
+                base_type(Args&&... args)
+                    : _impl(*new Impl(std::forward<Args>(args)...)) {};
 
                 /*
-                 *  default destructor to complete subclasses' vtables
-                 *  set to default as there is nothing to deinit
+                 *  default destructor to allow stack delete of descendants
                  */
 
                 virtual ~base_type() = default;
@@ -46,9 +77,17 @@ namespace ml::networks {
                  *      > predicting will return an error code, usually 0 for success and >0 for an error
                  */
 
-                virtual flt propagate(const std::vector<iT>&, const std::vector<oT>&) = 0;
-                virtual int calculate(const std::vector<iT>&, std::vector<oT>&) = 0;
-                virtual int update() = 0;
+                flt propagate_values(const input_type& i, output_type& o) {
+                    return _impl.propagate_values(i, o);
+                };
+                
+                int calculate_update(const input_type& i, output_type& o) {
+                    return _impl.calculate_update(i, o);
+                };
+                
+                int execute_update() {
+                    return _impl.execute_update();
+                };
 
 
                 /*
@@ -56,16 +95,16 @@ namespace ml::networks {
                  *  enables later saving and loading from drive
                  */
 
-                virtual int load(const std::string) = 0;
-                virtual int save(const std::string) = 0;
-
-            protected:
+                int load_parameters(const std::string& s) {
+                    return _impl.load_parameters(s);
+                };
                 
-                /* 
-                 *  variable to tell whether it has been initialised 
-                 */
-                 
-                bool _initialised = false;
+                int save_parameters(const std::string& s) const {
+                    return _impl.save_parameters(s);
+                };
+
+            private:                
+                Impl& _impl;
                 
         };
         
@@ -74,23 +113,16 @@ namespace ml::networks {
          *  function to train network on corpus
          */
         
-        template <typename iT, typename oT>
-        flt train(base_type<iT, oT>&);
+        template <class Impl> requires generic_impl<Impl>
+        flt train(base_type<Impl>&);
         
         
         /*
          *  function to predict with network from corpus
          */
          
-        template <typename iT, typename oT>    
-        flt predict(base_type<iT, oT>&);
-        
-        
-        /*
-         *  function to train network on corpus
-         */
-        
-        class mlp;
+        template <class Impl> requires generic_impl<Impl>
+        flt predict(base_type<Impl>&);
 
     }
     
@@ -99,7 +131,6 @@ namespace ml::networks {
      *  export detail symbols to outer namespace
      */
     
-    using detail::base_type, detail::mlp;
     using detail::train, detail::predict;
     
 };
@@ -116,7 +147,7 @@ namespace ml {
      *  type alias to use any network type with umbrella term 
      */
      
-    template <typename iT, typename oT>
-    using network = networks::base_type<iT, oT>;
+    template <class Impl>
+    using network = networks::detail::base_type<Impl>;
     
 };

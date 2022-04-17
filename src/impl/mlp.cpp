@@ -1,67 +1,39 @@
-#include <cstdlib>
-#include <cstdio>
-#include <vector>
+#include <iostream>
 
-#include "neural.h"
+#include "types.h"
+#include "utils.h"
 #include "network.h"
-#include "actfunc.h"
-#include "lossfunc.h"
 
 #include "mlp.h"
 
+using namespace ml::internal::types;
+using namespace ml::internal::utils;
 
-Neural::mlp::mlp(std::vector<size_t> npl, actfunc::type af) : net() {
-    size_t size = npl.size();
+namespace ml::networks::detail {
+    flt mlp_impl::propagate_values(const vector&, vector&) {
+        
+        return default_value<float>::value;
+    };
 
-    for(size_t n = 0; n < size; ++n) {
-        layer next = layer(npl[n], af);
+    int mlp_impl::calculate_update(const vector&, vector&) {
 
-        _layers.push_back(next);
-    }
+        return default_value<int>::value;
+    };
 
-    initialised = true;
-};
+    int mlp_impl::execute_update() {
 
-Neural::mlp::mlp(mlp_param_t params): mlp(params.npl, params.af)  {
-    // already initialised
-};
+        return default_value<int>::value;
+    };
 
-f32 Neural::mlp::regress(const mf32 &data, const mf32 &target, metadata_t params) {
-    return utils::random();
-};
 
-i32 Neural::mlp::predict(const mf32 &data, mf32 &output) {
-    return 0;
-};
+    int mlp_impl::load_parameters(const std::string) {
 
-i32 Neural::mlp::load(const std::string src) {
-    return 0;
-};
+        return default_value<int>::value;
+    };
 
-i32 Neural::mlp::save(const std::string src) {
-    return 0;
-};
+    int mlp_impl::save_parameters(const std::string) const {
 
-i32 Neural::mlp::push_back(u32 n, actfunc::type af) {
-    return 0;
-};
+        return default_value<int>::value;
+    };
 
-i32 Neural::mlp::pop_back() {
-    return 0;
-};
-
-i32 Neural::mlp::insert(u32 idx, u32 n, actfunc::type af) {
-    return 0;
-};
-
-i32 Neural::mlp::erase(u32 idx) {
-    return 0;
-};   
-
-f32 Neural::mlp::layer::backtrack(layer &prev, weights &weights) {
-    return 0;
-};
-
-f32 Neural::mlp::layer::propagate(layer &next, weights &weights) {
-    return 0;
-};
+}
