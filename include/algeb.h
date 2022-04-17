@@ -8,70 +8,102 @@
 #include "utils.h"
 
 namespace ml::internal::types {
-    enum vector_class {
-        COL_VEC = 0,
-        ROW_VEC,
-    };
     
-    template <typename ...Args>
-    matrix repeat(const vector_class c, const uint32_t n, Args&&... args) {
-        switch(c) {
-            default: throw std::invalid_argument("vector class invalid");
-            
-            case ROW_VEC: {
-                vector v(std::forward<Args>(args)...);
-                return matrix(n, v);
-            }
-            
-            case COL_VEC: {                
-                vector v(std::forward<Args>(args)...);
-                matrix m(v.size());
-                
-                std::for_each(
-                    std::execution::par_unseq,
-                    m.begin(), m.end(),
-                    [&](vector& row) {                        
-                        row.resize(n, v[ml::internal::utils::iterator_index(row, m)]);
-                    }
-                );
-                
-                return m;
-            }
-        }
-    }
-
-    template <typename ...Args>
-    matrix repeat(const vector_class c, const uint32_t n, std::initializer_list<flt> init, Args&&... args) {
-        switch(c) {
-            default: throw std::invalid_argument("vector class invalid");
-            
-            case ROW_VEC: {
-                vector v(std::forward<std::initializer_list<flt>>(init), std::forward<Args>(args)...);
-                return matrix(n, v);
-            }
-            
-            case COL_VEC: {                
-                vector v(std::forward<std::initializer_list<flt>>(init), std::forward<Args>(args)...);
-                matrix m(v.size());
-                
-                std::for_each(
-                    std::execution::par_unseq,
-                    m.begin(), m.end(),
-                    [&](vector& row) {                        
-                        row.resize(n, v[ml::internal::utils::iterator_index(row, m)]);
-                    }
-                );
-                
-                return m;
-            }
-        }
-    }
-    
-    matrix transpose_of(const matrix&);
-    bool verify_matrix(const matrix&);
-
     /*
-     *  addition defintions
+     *  detail namespace as to not import other namespaces to `namespace types` directly
+     */
+
+    namespace detail {
+        
+        /*
+         *  using declarations
+         */
+         
+        using namespace utils;
+        
+        
+        /*
+         *  enum to define direction of repetition depending on vector type
+         */
+
+        enum vector_class {
+            COL_VEC = 0,
+            ROW_VEC,
+        };
+        
+        
+        /*
+         *  repeat helper to construct matrix from repeated vector
+         */
+        
+        template <typename ...Args>
+        matrix repeat(const vector_class c, const uint32_t n, Args&&... args) {
+            switch(c) {
+                default: throw std::invalid_argument("vector class invalid");
+                
+                case ROW_VEC: {
+                    vector v(std::forward<Args>(args)...);
+                    return matrix(n, v);
+                }
+                
+                case COL_VEC: {                
+                    vector v(std::forward<Args>(args)...);
+                    matrix m(v.size());
+                    
+                    std::for_each(
+                        std::execution::par_unseq,
+                        m.begin(), m.end(),
+                        [&](vector& row) {                        
+                            row.resize(n, v[ml::internal::utils::iterator_index(row, m)]);
+                        }
+                    );
+                    
+                    return m;
+                }
+            }
+        }
+        
+        
+        /*
+         *  repeat helper to construct matrix from repeated vector, with initialiser list constructor
+         */
+
+        template <typename ...Args>
+        matrix repeat(const vector_class c, const uint32_t n, std::initializer_list<flt> init, Args&&... args) {
+            vector v(std::forward<std::initializer_list<flt>>(init), std::forward<Args>(args)...);
+            
+            return repeat(c, n, v);
+        }
+        
+        
+        /*
+         *  return transpose of matrix (not in-place)
+         */
+        
+        matrix transpose_of(const matrix&);
+        
+        
+        /*
+         *  check whether matrix is rectangular (all rows same length)
+         */
+         
+        bool verify_matrix(const matrix&);
+        
+    }
+    
+    
+    /*
+     *  export detail symbols to outer namespace
+     */
+     
+    using detail::vector_class;
+    using detail::ROW_VEC, detail::COL_VEC;
+    using detail::repeat;
+    using detail::transpose_of, detail::verify_matrix;
+    
+    
+    /*
+     *  function style operator+ overload defintions
      */
 
     vector operator+(const vector&, const flt&);
@@ -80,8 +112,9 @@ namespace ml::internal::types {
     matrix operator+(const matrix&, const flt&);
     matrix operator+(const matrix&, const matrix&);
 
+
     /*
-     *  plus-equals defintions
+     *  function style operator+= overload defintions
      */
 
     vector& operator+=(vector&, const flt&);
@@ -92,7 +125,7 @@ namespace ml::internal::types {
 
 
     /*
-     *  subtraction defintions
+     *  function style operator- overload defintions
      */
 
     vector operator-(const vector&, const flt&);
@@ -101,8 +134,9 @@ namespace ml::internal::types {
     matrix operator-(const matrix&, const flt&);
     matrix operator-(const matrix&, const matrix&);
 
+
     /*
-     *  minus-equals defintions
+     *  function style operator-= overload defintions
      */
 
     vector& operator-=(vector&, const flt&);
@@ -111,8 +145,9 @@ namespace ml::internal::types {
     matrix& operator-=(matrix&, const flt&);
     matrix& operator-=(matrix&, const matrix&);
 
+
     /*
-     *  dot product defintions
+     *  function style operator* overload defintions (dot product)
      */
 
     flt operator*(const vector&, const vector&);
@@ -122,8 +157,9 @@ namespace ml::internal::types {
     vector operator*(const matrix&, const vector&);
     matrix operator*(const matrix&, const matrix&);
 
+
     /*
-     *  elementwise (hadamarand) product defintions
+     *  function style operator& overload defintions (hadamarand product)
      */
 
     vector operator&(const vector&, const flt&);
@@ -132,8 +168,9 @@ namespace ml::internal::types {
     matrix operator&(const matrix&, const flt&);
     matrix operator&(const matrix&, const matrix&);
 
+
     /*
-     *  times-equals defintions
+     *  function style operator{*,&}= overload defintions (times-equals, dot and hadamarand respectively)
      */
 
     vector& operator*=(vector&, const flt&);
@@ -143,4 +180,5 @@ namespace ml::internal::types {
     matrix& operator*=(matrix&, const matrix&);
     matrix& operator&=(matrix&, const flt&);
     matrix& operator&=(matrix&, const matrix&);
+    
 };

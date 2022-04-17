@@ -6,74 +6,83 @@
 #include <functional>
 #include <execution>
 
-#include "neural.h"
 #include "algeb.h"
 #include "types.h"
 
 /*
- *  lossfunc namespace, to clarify useage
+ *  lossfunc namespace
  */
 
 namespace ml::lossf {
+    
     /*
-     *  using declarations
+     *  detail namespace as to not import other namespaces to `namespace network` directly
      */
 
-    using namespace internal::types;
-
-
-    /*
-     *  inheritable class to be able to pass all lossfuncs as a single pointer
-     */
-
-    struct value_type {
+    namespace detail {
         /*
-         *  loss function itself
+         *  using declarations
          */
 
-        std::function<flt (flt, flt)> f;
+        using namespace internal::types;
 
 
         /*
-         *  derivative of the loss function
+         *  inheritable class to be able to pass all lossfuncs as a single pointer
          */
 
-        std::function<flt (flt, flt)> df;
+        struct value_type {
+            /*
+             *  loss function itself
+             */
+
+            std::function<flt (flt, flt)> f;
+
+
+            /*
+             *  derivative of the loss function
+             */
+
+            std::function<flt (flt, flt)> df;
+            
+        };
+
+        /*
+         *  Accumulator function to simplify error calculation
+         */
+
+        flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f);
+
+
+        /*
+         *  Mean Squared Error (L2)
+         */
+
+        extern value_type mse;
+
+
+        /*
+         *  Mean Absolute Error (L1)
+         */
+
+        extern value_type mae;
+
+
+        /*
+         *  Cross Entropy or Log Loss Error
+         */
+
+        extern value_type xee;
         
-        /*
-         *  utility to create pair with (a, b)
-         */
-         
-        std::pair<value_type, value_type> operator,(value_type& r) {
-            return std::make_pair(*this, r);
-        }
-    };
-
-
+    }
+    
+    
     /*
-     *  Accumulator function to simplify error calculation
+     *  export detail symbols to outer namespace
      */
-
-    flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f);
-
-
-    /*
-     *  Mean Squared Error (L2)
-     */
-
-    extern value_type mse;
-
-
-    /*
-     *  Mean Absolute Error (L1)
-     */
-
-    extern value_type mae;
-
-
-    /*
-     *  Cross Entropy or Log Loss Error
-     */
-
-    extern value_type xee;
+    
+    using detail::value_type;
+    using detail::mse, detail::mae, detail::xee;
+    using detail::accumulate;
+    
 };
