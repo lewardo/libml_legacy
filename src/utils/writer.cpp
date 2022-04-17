@@ -4,13 +4,6 @@
 #include "types.h"
 #include "utils.h"
 
-using namespace ml::types;
-using namespace ml::utils;
+using namespace ml::internal::types;
+using namespace ml::internal::utils;
 
-class ml::utils::writer {
-    public:
-        
-    
-    private:
-        std::ofstream _ofs;
-};
