@@ -44,13 +44,20 @@ namespace ml::actf {
 
             std::function<flt (flt)> df;
         };
-    
+        
+        
+        /*
+         *  using type alias
+         */
+        
+        using pair_type = std::pair<value_type, value_type>;
+        
         
         /*
          *  utility to create pair with (a, b)
          */
          
-        inline std::pair<value_type, value_type> operator,(value_type& l, value_type& r) {
+        inline pair_type operator,(value_type& l, value_type& r) {
             return std::make_pair(l, r);
         }
 
@@ -89,7 +96,7 @@ namespace ml::actf {
      *  export detail symbols to outer namespace
      */
     
-    using detail::value_type;
+    using detail::value_type, detail::pair_type;
     using detail::sigmoid, detail::tanh, detail::relu, detail::linear;
 
 }
