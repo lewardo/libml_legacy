@@ -13,7 +13,11 @@ namespace ml::networks {
     
     namespace detail {
         class mlp_impl : public base_impl<vector, vector> {
-            public:                
+            public:
+                mlp_impl();
+                
+                ~mlp_impl() = default;
+                
                 flt propagate_values(const input_type&, output_type&) final;
                 int calculate_update(const input_type&, output_type&) final;
                 int execute_update() final;
@@ -22,12 +26,14 @@ namespace ml::networks {
                 int save_parameters(const std::string) const final;
             
         };
+        
+        using mlp = base_type<mlp_impl>;
     };
 
     /*
      *  mlp object
      */
 
-    using mlp = detail::base_type<detail::mlp_impl>;
+    using detail::mlp;
     
 }
