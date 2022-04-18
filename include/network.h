@@ -22,52 +22,114 @@ namespace ml::networks {
         using namespace internal::types;
 
 
+        /*
+         *  implementation abstract class that defines the ABI for network implementation classes, or can just use a free class that adheres to `concept generic_impl`
+         */
+
         template <typename iT, typename oT>
         class base_impl {
             public:
+                
+                /*
+                 *  pubilc using type alias
+                 */
+                 
                 using input_type = iT;
                 using output_type = oT;
                 
+
+                /*
+                 *  virtual destructor to allow stack delete of descendants
+                 */
+                 
                 virtual ~base_impl() = default;
+                
+                
+                /*
+                 *  network functions
+                 */
                 
                 virtual flt propagate_values(const input_type&, output_type&) = 0;
                 virtual int calculate_update(const input_type&, output_type&) = 0;
                 virtual int execute_update() = 0;
+                
+                
+                /*
+                 *  network saving and loading
+                 */
         
                 virtual int load_parameters(const std::string) = 0;
                 virtual int save_parameters(const std::string) const = 0;
+                
+                
             protected:
+                
+                /*
+                 *  private global variable that can be used for empty constructor+load process
+                 */
+                 
                 bool _initialised = false;
+                
         };
         
+        
+        /*
+         *  concept that checks whether an implementation is compatible
+         */
+        
         template <class Impl>
-        concept generic_impl = std::derived_from<Impl, base_impl<typename Impl::input_type, typename Impl::output_type>> && requires {
+        concept generic_impl = std::derived_from<Impl, base_impl<typename Impl::input_type, typename Impl::output_type>> || requires (Impl impl, Impl::input_type iT, Impl::output_type oT, std::string s) {
+            
+            /*
+             *  type requirements
+             */
+             
             typename Impl::input_type;
             typename Impl::output_type;
+            
+            
+            /*
+             *  function requirements
+             */
+            
+            { impl.propagate_values(iT, oT) } -> std::same_as<flt>;
+            { impl.calculate_update(iT, oT) } -> std::same_as<int>;
+            { impl.execute_update() } -> std::same_as<int>;
+            
+            { impl.load_parameters(s) } -> std::same_as<int>;
+            { impl.save_parameters(s) } -> std::same_as<int>;
+            
         };
+        
 
         /*
-         * Network abstract class that will be inherited by all the network objects
-         *
-         * defines pure virtual access functions, and a protected member to say whether it has been initialised
-         *
+         * Network template class that is specialised by implementatinon reference
          */
 
         template <class Impl> requires generic_impl<Impl>
         class base_type {
+            
+            /*
+             *  using type alias
+             */
+             
+            using input_type = Impl::input_type;
+            using output_type = Impl::output_type;
+            
+            
             public:
-                using input_type = Impl::input_type;
-                using output_type = Impl::output_type;
+                
+                /*
+                 *  perfect variadic forwarding constructor to initialise impl object rather than this
+                 */
                 
                 template <typename... Args>  
                 base_type(Args&&... args)
                     : _impl(*new Impl(std::forward<Args>(args)...)) {};
-
-                /*
-                 *  default destructor to allow stack delete of descendants
-                 */
-
-                virtual ~base_type() = default;
+                
+                ~base_type() {
+                    delete& _impl;
+                }
 
 
                 /*
