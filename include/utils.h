@@ -69,14 +69,14 @@ namespace ml::internal::utils {
 
         template <size_t Nt, size_t Ns, typename T> requires std::is_default_constructible_v<T>
         constexpr std::array<T, Nt> resize_array(const std::array<T, Ns>& from) {
-            return [&]<size_t... Is>(const std::array<T, Ns>& arr, std::index_sequence<Is...>) -> std::array<T, Nt> {
+            return [&] <size_t... Is> (const std::array<T, Ns>& arr, std::index_sequence<Is...>) -> std::array<T, Nt> {
                 return { arr[Is]... };
             } (from, std::make_index_sequence<std::min(Nt, Ns)>{});
         };
 
-        template <size_t Lo, size_t Hi, size_t Ns, typename T, size_t Nt = Hi-Lo> requires std::is_default_constructible_v<T>
-        constexpr auto sub_array(const std::array<T, Ns>& from) -> std::array<T, Nt> {
-            return [&]<size_t... Is>(const std::array<T, Ns>& arr, meta::sequence<Is...>) -> std::array<T, Nt> {
+        template <size_t Lo, size_t Hi, size_t Ns, typename T, size_t Nt = Hi-Lo>
+        constexpr auto sub_array(const std::array<T, Ns>& from) {
+            return [&] <size_t... Is> (const std::array<T, Ns>& arr, meta::sequence<Is...>) -> std::array<T, Nt> {
                 return { arr[Is]... };
             } (from, meta::make_range_sequence<Lo, Hi>{});
         };
@@ -86,6 +86,13 @@ namespace ml::internal::utils {
             std::array<T, N+1> tmp = resize_array<N+1>(from);
             return (tmp[N] = val, tmp);
         };
+
+        template <size_t N, typename T>
+        std::valarray<T> to_valarray(const std::array<T, N>& from) {
+            return [&] <size_t... Is> (const std::array<T, N>& arr, meta::sequence<Is...>) -> std::valarray<T> {
+                return { arr[Is]... };
+            } (from, meta::make_range_sequence<0, N>{});
+        }
     };
 
 
@@ -95,6 +102,6 @@ namespace ml::internal::utils {
 
     using detail::iterator_index;
     using detail::default_value, detail::default_value_v;
-    using detail::resize_array, detail::sub_array, detail::append_array;
+    using detail::resize_array, detail::sub_array, detail::append_array, detail::to_valarray;
 
 };
