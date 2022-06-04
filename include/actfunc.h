@@ -8,17 +8,17 @@
 
 
 /*
- *  actfunc namespace 
+ *  actfunc namespace
  */
 
 namespace ml::actf {
-    
+
     /*
      *  detail namespace as to not import other namespaces to `namespace network` directly
      */
 
     namespace detail {
-        
+
         /*
          *  using declarations
          */
@@ -44,19 +44,19 @@ namespace ml::actf {
 
             std::function<flt (flt)> df;
         };
-        
-        
+
+
         /*
          *  using type alias
          */
-        
+
         using pair_type = std::pair<value_type, value_type>;
-        
-        
+
+
         /*
          *  utility to create pair with (a, b)
          */
-         
+
         inline pair_type operator,(value_type& l, value_type& r) {
             return std::make_pair(l, r);
         }
@@ -88,15 +88,19 @@ namespace ml::actf {
          */
 
         extern value_type linear;
-        
+
     }
-    
-    
+
+
     /*
      *  export detail symbols to outer namespace
      */
-    
+
     using detail::value_type, detail::pair_type;
     using detail::sigmoid, detail::tanh, detail::relu, detail::linear;
 
+}
+
+namespace ml {
+    using actfunc = actf::value_type;
 }
