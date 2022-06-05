@@ -16,7 +16,7 @@
 
 #include "libml/mlp.h"
 
-#define LIBML_VERSION 1.0.0
+#define LIBML_VERSION 0.0.0
 #define LIBML
 
 namespace ml {};
