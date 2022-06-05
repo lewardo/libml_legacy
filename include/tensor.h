@@ -39,25 +39,31 @@ ml_namespace(internal, types) {
         template <size_t N>
         class tensor_extent {
             public:
-                using ext_type      = std::array<size_t, N>;
-                using strd_type     = std::array<size_t, N+1>;
+                using extent_type   = std::valarray<size_t>;
+                using arg_type     = std::array<size_t, N>;
 
                 static constexpr auto rank = N;
 
-                tensor_extent(ext_type dim)
-                :   tensor_extent(dim, tr_dims(dim)) {};
+                tensor_extent(arg_type dims)
+                :   tensor_extent(dims, tr_dims(dims)) {};
 
-                tensor_extent(ext_type dim, strd_type strd)
-                :   _dimensions(dim),
-                    _strides(strd) {};
+                tensor_extent(arg_type dims, arg_type strd)
+                :   _dimensions(utils::to_valarray(dims)),
+                    _strides(utils::to_valarray(strd)),
+                    _size(dims[0] * strd[0]) {};
 
-                size_t dims(size_t i) const { return _dimensions[i  ]; };
-                size_t strd(size_t i) const { return    _strides[i+1]; };
+                tensor_extent(extent_type dims, extent_type strd)
+                :   _dimensions(dims),
+                    _strides(strd),
+                    _size(dims[0] * strd[0]) {};
 
-                ext_type dimensions() { return _dimensions; };
-                ext_type strides() { return utils::sub_array<1, N+1>(_strides); };
+                size_t dims(size_t i) const { return _dimensions[i]; };
+                size_t strd(size_t i) const { return    _strides[i]; };
 
-                size_t size() const { return _strides[0]; };
+                extent_type dimensions() { return _dimensions; };
+                extent_type    strides() { return    _strides; };
+
+                size_t size() const { return _size; };
 
                 // please forgive me~
                 template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::equal<sizeof...(Args), N>::value
@@ -71,21 +77,21 @@ ml_namespace(internal, types) {
                     } (std::tuple<Args...>(args...), std::make_index_sequence<N>{});
                 };
 
-                static constexpr strd_type tr_dims(const ext_type& dims) {
-                    // lambdaified helper template function, to instantiate a parameter pack of N 1s (Is...) to initialise the stride array to ones programatically
-                    return [&] <size_t... Is>(meta::sequence<Is...>) {
-                        strd_type strd = { Is... };   // { 1, 1, 1, 1... }
+                static constexpr arg_type tr_dims(arg_type dims) {
+                    arg_type strd;
 
-                        for (size_t n = N; n > 0; --n)
-                            strd[n-1] = dims[n-1] * strd[n];
+                    strd[N-1] = 1;
 
-                        return strd;
-                    } (meta::make_repeat_sequence<N+1, 1>{});
+                    for (size_t n = N-1; n > 0; --n)
+                        strd[n-1] = dims[n-1] * strd[n];
+
+                    return strd;
                 };
 
             private:
-                const ext_type _dimensions;
-                const strd_type _strides;
+                const extent_type _dimensions;
+                const extent_type _strides;
+                const size_t _size;
         };
 
         template <typename T, size_t N>
@@ -164,14 +170,19 @@ ml_namespace(internal, types) {
                 :   _extent(dim),
                     _container(init, _extent.size()) {};
 
-                template <typename... Args, size_t S = meta::count_same<slice_t, Args...>::value> requires std::conjunction<meta::all_either<std::is_same, slice_t, std::is_same, index_t, Args...>, meta::equal<sizeof...(Args), N>>::value
+                template <typename... Args, size_t S = meta::count_same<slice_t, Args...>::value> requires std::conjunction<meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>, meta::equal<sizeof...(Args), N>>::value
                 tensor_slice<T, S> operator ()(Args&&... args) {
                     if constexpr (meta::equal<S, 0>::value)
                         return tensor_slice<T, 0>(_container[_extent.calculate_offset(args...)]);
-                    else if constexpr (meta::equal<S, N>::value)
-                        return tensor_slice<T, N>(_container[std::gslice(0, utils::to_valarray(_extent.dimensions()), utils::to_valarray(_extent.strides()))], _extent);
                     else {
-                        return tensor_slice<T, S>();
+                        size_t offset = _extent.calculate_offset((size_t) args...);
+
+                        std::valarray<size_t> dims = utils::extract_indicies(_extent.dimensions(), meta::indicies_satisfy<std::is_same, slice_t, Args...>{});
+                        std::valarray<size_t> strd = utils::extract_indicies(_extent.strides(),    meta::indicies_satisfy<std::is_same, slice_t, Args...>{});
+
+                        for(auto& x : dims) std::cout << x << ' ';
+
+                        return tensor_slice<T, S>(_container[std::gslice(offset, dims, strd)], tensor_extent<S>(dims, strd));
                     }
                 };
 
