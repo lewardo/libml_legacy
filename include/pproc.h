@@ -34,7 +34,7 @@
 #define QUALIFIER(X) ::X
 #define QUALIFIED(...) FOR_EACH(QUALIFIER, __VA_ARGS__)
 
-#define ml_namespace(...) namespace QUALIFIED(ml, __VA_ARGS__)
+#define ml_namespace(...) namespace ml QUALIFIED(__VA_ARGS__)
 
 #define USING_DECL(NS) using namespace ::ml::NS;
 #define ml_using(...) FOR_EACH(USING_DECL, __VA_ARGS__)
