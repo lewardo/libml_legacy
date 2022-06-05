@@ -67,31 +67,42 @@ namespace ml::internal::utils {
         //     return { from[I]... };
         // };
 
+        template <typename R, typename T, size_t... Is>
+        auto indicies(T t, meta::sequence<Is...>) -> R {
+            return { t[Is]... };
+        };
+
         template <size_t Nt, size_t Ns, typename T> requires std::is_default_constructible_v<T>
         constexpr std::array<T, Nt> resize_array(const std::array<T, Ns>& from) {
-            return [&] <size_t... Is> (const std::array<T, Ns>& arr, std::index_sequence<Is...>) -> std::array<T, Nt> {
-                return { arr[Is]... };
-            } (from, std::make_index_sequence<std::min(Nt, Ns)>{});
+            return [&] <size_t... Is> (std::index_sequence<Is...>) -> std::array<T, Nt> {
+                return { from[Is]... };
+            } (std::make_index_sequence<std::min(Nt, Ns)>{});
         };
 
         template <size_t Lo, size_t Hi, size_t Ns, typename T, size_t Nt = Hi-Lo>
         constexpr auto sub_array(const std::array<T, Ns>& from) {
-            return [&] <size_t... Is> (const std::array<T, Ns>& arr, meta::sequence<Is...>) -> std::array<T, Nt> {
-                return { arr[Is]... };
-            } (from, meta::make_range_sequence<Lo, Hi>{});
+            return [&] <size_t... Is> (meta::sequence<Is...>) -> std::array<T, Nt> {
+                return { from[Is]... };
+            } (meta::make_range_sequence<Lo, Hi>{});
         };
 
         template <size_t N, typename T>
-        std::array<T, N+1> append_array(const std::array<T, N>& from, const T& val) {
+        std::array<T, N+1> append_array(const std::array<T, N> &from, const T& val) {
             std::array<T, N+1> tmp = resize_array<N+1>(from);
             return (tmp[N] = val, tmp);
         };
 
         template <size_t N, typename T>
-        std::valarray<T> to_valarray(const std::array<T, N>& from) {
-            return [&] <size_t... Is> (const std::array<T, N>& arr, meta::sequence<Is...>) -> std::valarray<T> {
-                return { arr[Is]... };
-            } (from, meta::make_range_sequence<0, N>{});
+        std::valarray<T> to_valarray(const std::array<T, N> &from) {
+            // return indicies<std::valarray<T>>(from, meta::make_range_sequence<0, N>{});
+            return [&] <size_t... Is> (meta::sequence<Is...>) -> std::valarray<T> {
+                return { from[Is]... };
+            } (meta::make_range_sequence<0, N>{});
+        }
+
+        template <typename T, size_t... Is>
+        std::valarray<T> extract_indicies(const std::valarray<T> &from, meta::sequence<Is...>) {
+            return { from[Is]... };
         }
     };
 
@@ -103,5 +114,6 @@ namespace ml::internal::utils {
     using detail::iterator_index;
     using detail::default_value, detail::default_value_v;
     using detail::resize_array, detail::sub_array, detail::append_array, detail::to_valarray;
+    using detail::extract_indicies;
 
 };
