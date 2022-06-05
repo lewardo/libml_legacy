@@ -108,18 +108,7 @@ ml_namespace(internal, types) {
                 template <typename, size_t>
                 friend class tensor;
 
-                // void operator =(auto&& arg) {
-                //     std::printf("_____SLICE______\nsize %ld\ndims ", _extent.size());
-                //     for(size_t x : _extent.dimensions()) std::printf("%ld ", x);
-                //
-                //     std::cout << "\nstrd ";
-                //     for(size_t x : _extent.strides()) std::printf("%ld ", x);
-                //     std::cout << "\n";
-                //
-                //     return _slice.operator =(std::forward<decltype(arg)>(arg));
-                // };
-
-                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> void operator op(Args&&... args) const { _ref[_slice].operator op(std::forward<Args&&>(args)...); }
+                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) const { return _ref[_slice].operator op(std::forward<Args&&>(args)...); }
                     FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
@@ -160,8 +149,8 @@ ml_namespace(internal, types) {
                 static constexpr auto rank = extent_type::rank;
 
                 tensor(const tensor_slice<T, N>& slice)
-                :   _extent(slice._extent),
-                    _container(slice._slice) {};
+                :   _extent(slice._slice.size(), slice._slice.stride()),
+                    _container(slice._ref[slice._slice]) {};
 
                 template <typename... Args> requires std::constructible_from<T, Args...>
                 tensor(const std::array<size_t, N> dim, Args&&... args)
@@ -170,6 +159,14 @@ ml_namespace(internal, types) {
                 tensor(const std::array<size_t, N> dim, T init)
                 :   _extent(dim),
                     _container(init, _extent.size()) {};
+
+                operator container_type() { return _container; };
+
+                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) { return _container.operator op(std::forward<Args&&>(args)...); }
+                #define ML_TENSOR_DEFINE_UNARY_OPERATOR(op) decltype(auto) operator op() { _container.operator op(); }
+                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
+                    FOR_EACH(ML_TENSOR_DEFINE_UNARY_OPERATOR, +, -, ~, !);
+                #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
                 template <typename... Args, size_t S = meta::count_same<slice_t, Args...>::value> requires std::conjunction<meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>, meta::equal<sizeof...(Args), N>>::value
                 tensor_slice<T, S> operator ()(Args&&... args) {
