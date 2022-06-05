@@ -1,8 +1,11 @@
 ﻿#pragma once
 
-#include <cstdint>
+#include <cstddef>
+#include <variant>
 #include <vector>
 #include <array>
+
+#include "pproc.h"
 
 
 /*
@@ -19,28 +22,37 @@ T c_cast(auto&& o) {
  *  namespace types
  */
 
-namespace ml::internal::types {
-    
+ml_namespace(internal, types) {
+
+    using index_t = decltype(0); // default integer rvalue type
+
+    enum slice_t: index_t {
+        SLICE = 0,
+    };
+
     /*
-     *  library-wide decimal precision, for example 
+     *  library-wide decimal precision, for example
      */
-     
+
     using flt = float;
-    
-    
+
+
     /*
      *  vector and matrix type aliases
      */
-     
+
     using vector = std::vector<flt>;
     using matrix = std::vector<std::vector<flt>>;
-    
-    
+
+
+    using empty_type = std::monostate;
+
+
     /*
      *  time series of fixed length as array
      */
-     
-    template <std::size_t N, typename T>
+
+    template <size_t N, typename T>
     using series = std::array<T, N>;
-    
+
 };
