@@ -40,7 +40,7 @@ ml_namespace(internal, types) {
         class tensor_extent {
             public:
                 using extent_type   = std::valarray<size_t>;
-                using arg_type     = std::array<size_t, N>;
+                using arg_type      = std::array<size_t, N>;
 
                 static constexpr auto rank = N;
 
@@ -60,21 +60,21 @@ ml_namespace(internal, types) {
                 size_t dims(size_t i) const { return _dimensions[i]; };
                 size_t strd(size_t i) const { return    _strides[i]; };
 
-                extent_type dimensions() { return _dimensions; };
-                extent_type    strides() { return    _strides; };
+                extent_type dimensions() const { return _dimensions; };
+                extent_type    strides() const { return    _strides; };
 
                 size_t size() const { return _size; };
 
                 // please forgive me~
-                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::equal<sizeof...(Args), N>::value
+                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::count_equals<N, Args...>::value
                 decltype(auto) calculate_offset(Args... args) {
                     // compartimentalised and localised version of a deferring function, templated lambda that accetps index sequence and tuple of forwarded arguments, capturing `this` by reference
                     // asserts that all the arguments are in bound then returns elementwise multiplication with strides over summation fold expression
                     // calls lambda while forwarding args as tuple, and with index sequence of length args
-                    return [this] <typename... Ts, template <typename...> class Tup, size_t... I> (const Tup<Ts...>& tup, std::index_sequence<I...>) {
+                    return [this] <typename... Ts, template <typename...> class Tup, size_t... I> (const Tup<Ts...>& tup, meta::sequence<I...>) {
                         assert("index out of bounds" && (((size_t) std::get<I>(tup) < _dimensions[I]) && ...));
-                        return ((std::get<I>(tup) * _strides[I+1]) + ...);
-                    } (std::tuple<Args...>(args...), std::make_index_sequence<N>{});
+                        return ( ... + (std::get<I>(tup) * _strides[I]) );
+                    } (std::tuple<Args...>(args...), meta::index_sequence<N>);
                 };
 
                 static constexpr arg_type tr_dims(arg_type dims) {
@@ -83,8 +83,8 @@ ml_namespace(internal, types) {
                     strd[N-1] = 1;
 
                     for (size_t n = N-1; n > 0; --n)
-                        strd[n-1] = dims[n-1] * strd[n];
-
+                        strd[n-1] = dims[n] * strd[n];
+                    
                     return strd;
                 };
 
@@ -177,8 +177,8 @@ ml_namespace(internal, types) {
                     else {
                         size_t offset = _extent.calculate_offset((size_t) args...);
 
-                        std::valarray<size_t> dims = utils::extract_indicies(_extent.dimensions(), meta::indicies_satisfy<std::is_same, slice_t, Args...>{});
-                        std::valarray<size_t> strd = utils::extract_indicies(_extent.strides(),    meta::indicies_satisfy<std::is_same, slice_t, Args...>{});
+                        std::valarray<size_t> dims = utils::extract_indicies(_extent.dimensions(), meta::satisfy_sequence<std::is_same, slice_t, Args...>);
+                        std::valarray<size_t> strd = utils::extract_indicies(_extent.strides(),    meta::satisfy_sequence<std::is_same, slice_t, Args...>);
 
                         for(auto& x : dims) std::cout << x << ' ';
 
