@@ -14,6 +14,12 @@ namespace ml::internal::meta {
         template <typename T>
         static constexpr auto are_same<T, T> = 1;
 
+        template <size_t N, size_t... Is>
+        constexpr auto make_index_sequence_impl() {
+            if constexpr (N == 0) return sequence<Is...>{};
+            else return make_index_sequence_impl<N-1, N-1, Is...>();
+        }
+
 
         template <size_t N, size_t V, size_t... Is>
         constexpr auto make_repeat_sequence_impl() {
@@ -28,15 +34,20 @@ namespace ml::internal::meta {
         };
 
         template <size_t S, size_t N, template <typename, typename> class P, typename T, typename Ta, typename... Ts, size_t... Is>
-        constexpr auto indicies_satisfy_impl(sequence<Is...>) {
+        constexpr auto make_satisfy_sequence_impl(sequence<Is...>) {
             if constexpr (P<T, Ta>::value) {
                 if constexpr (N == 0) return sequence<Is..., S-(N+1)>{};
-                else return indicies_satisfy_impl<S, N-1, P, T, Ts...>(sequence<Is..., S-(N+1)>{});
+                else return make_satisfy_sequence_impl<S, N-1, P, T, Ts...>(sequence<Is..., S-(N+1)>{});
             } else {
                 if constexpr (N == 0) return sequence<Is...>{};
-                else return indicies_satisfy_impl<S, N-1, P, T, Ts...>(sequence<Is...>{});
+                else return make_satisfy_sequence_impl<S, N-1, P, T, Ts...>(sequence<Is...>{});
             }
         }
+    };
+
+    template <size_t N, typename... Args>
+    struct count_equals {
+        static constexpr auto value = sizeof...(Args) == N;
     };
 
     template <size_t A, size_t B>
@@ -63,12 +74,27 @@ namespace ml::internal::meta {
         static constexpr auto value = (( detail::are_same<T, Args> + ... ));
     };
 
+    template <size_t N>
+    using make_index_sequence = decltype(detail::make_index_sequence_impl<N>());
+
+    template <size_t N>
+    constexpr auto index_sequence = make_index_sequence<N>{};
+
     template <size_t N, size_t V>
     using make_repeat_sequence = decltype(detail::make_repeat_sequence_impl<N, V>());
+
+    template <size_t N, size_t V>
+    constexpr auto repeat_sequence = make_repeat_sequence<N, V>{};
 
     template <size_t L, size_t H>
     using make_range_sequence = decltype(detail::make_range_sequence_impl<H, L>());
 
+    template <size_t N, size_t V>
+    constexpr auto range_sequence = make_range_sequence<N, V>{};
+
     template <template <typename, typename> class P, typename T, typename... Ts>
-    using indicies_satisfy = decltype(detail::indicies_satisfy_impl<sizeof...(Ts), sizeof...(Ts)-1, P, T, Ts...>(sequence {}));
+    using make_satisfy_sequence = decltype(detail::make_satisfy_sequence_impl<sizeof...(Ts), sizeof...(Ts)-1, P, T, Ts...>(sequence {}));
+
+    template <template <typename, typename> class P, typename T, typename... Ts>
+    constexpr auto satisfy_sequence = make_satisfy_sequence<P, T, Ts...>{};
 };
