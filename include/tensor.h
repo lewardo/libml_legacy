@@ -48,9 +48,7 @@ ml_namespace(internal, types) {
                 :   tensor_extent(dims, tr_dims(dims)) {};
 
                 tensor_extent(arg_type dims, arg_type strd)
-                :   _dimensions(utils::to_valarray(dims)),
-                    _strides(utils::to_valarray(strd)),
-                    _size(dims[0] * strd[0]) {};
+                :   tensor_extent(utils::to_valarray(dims), utils::to_valarray(strd)) {};
 
                 tensor_extent(extent_type dims, extent_type strd)
                 :   _dimensions(dims),
@@ -60,8 +58,8 @@ ml_namespace(internal, types) {
                 size_t dims(size_t i) const { return _dimensions[i]; };
                 size_t strd(size_t i) const { return    _strides[i]; };
 
-                extent_type dimensions() const { return _dimensions; };
-                extent_type    strides() const { return    _strides; };
+                const extent_type dimensions() const { return _dimensions; };
+                const extent_type    strides() const { return    _strides; };
 
                 size_t size() const { return _size; };
 
@@ -84,7 +82,7 @@ ml_namespace(internal, types) {
 
                     for (size_t n = N-1; n > 0; --n)
                         strd[n-1] = dims[n] * strd[n];
-                    
+
                     return strd;
                 };
 
@@ -98,29 +96,36 @@ ml_namespace(internal, types) {
         class tensor_slice {
             public:
                 using extent_type       = tensor_extent<N>;
-                using slice_type        = std::gslice_array<T>;
+                using slice_type        = std::gslice;
+                using container_type    = std::add_lvalue_reference_t<std::valarray<T>>;
 
                 static constexpr auto rank = extent_type::rank;
 
-                tensor_slice(slice_type s, extent_type e)
-                :   _slice(s),
-                    _extent(e) {};
+                tensor_slice(container_type c, slice_type s)
+                :   _ref(c),
+                    _slice(s) {};
 
                 template <typename, size_t>
                 friend class tensor;
 
-                decltype(auto) operator =(auto&& arg) {
-                    std::cout << "ree\n";
-                    return _slice.operator=(std::forward<decltype(arg)>(arg));
-                };
+                // void operator =(auto&& arg) {
+                //     std::printf("_____SLICE______\nsize %ld\ndims ", _extent.size());
+                //     for(size_t x : _extent.dimensions()) std::printf("%ld ", x);
+                //
+                //     std::cout << "\nstrd ";
+                //     for(size_t x : _extent.strides()) std::printf("%ld ", x);
+                //     std::cout << "\n";
+                //
+                //     return _slice.operator =(std::forward<decltype(arg)>(arg));
+                // };
 
-                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> void operator op(Args&&... args) const { _slice.operator op(std::forward<Args&&>(args)...); }
-                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
-                #undef ML_TENSOR_DEFINE_MEMBER_OPERATOR
+                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> void operator op(Args&&... args) const { _ref[_slice].operator op(std::forward<Args&&>(args)...); }
+                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
+                #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
             private:
+                container_type _ref;
                 slice_type _slice;
-                extent_type _extent;
 
         };
 
@@ -128,26 +133,22 @@ ml_namespace(internal, types) {
         class tensor_slice<T, 0> {
             public:
                 using extent_type       = tensor_extent<0>;
-                using value_type        = std::add_lvalue_reference_t<T>;
+                using container_type    = std::add_lvalue_reference_t<T>;
 
                 static constexpr auto rank = extent_type::rank;
 
-                tensor_slice(value_type& init)
+                tensor_slice(container_type init)
                 :   _ref(init) {};
 
                 operator tensor<T, 0>() { return tensor<T, 0>(_ref); };
                 operator T&() { return _ref; };
 
-                decltype(auto) operator =(T t) {
-                    return _ref = t;
-                }
-
-                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) void operator op(T& arg) const { _ref op arg; }
-                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
+                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) void operator op(T arg) const { _ref op arg; }
+                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
             private:
-                value_type _ref;
+                container_type _ref;
         };
 
         template <typename T, size_t N> requires valid_valarray<T>
@@ -180,9 +181,7 @@ ml_namespace(internal, types) {
                         std::valarray<size_t> dims = utils::extract_indicies(_extent.dimensions(), meta::satisfy_sequence<std::is_same, slice_t, Args...>);
                         std::valarray<size_t> strd = utils::extract_indicies(_extent.strides(),    meta::satisfy_sequence<std::is_same, slice_t, Args...>);
 
-                        for(auto& x : dims) std::cout << x << ' ';
-
-                        return tensor_slice<T, S>(_container[std::gslice(offset, dims, strd)], tensor_extent<S>(dims, strd));
+                        return tensor_slice<T, S>(_container, std::gslice(offset, dims, strd));
                     }
                 };
 
@@ -208,7 +207,7 @@ ml_namespace(internal, types) {
 
                 operator value_type() { return _value; };
 
-                constexpr size_t size() const { return 1; };
+                consteval size_t size() const { return 1; };
                 value_type& value() { return _value; };
 
             private:
