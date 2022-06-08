@@ -15,6 +15,9 @@
 
 #define ifnt(condition) if(!( condition ))
 
+// www.foonathan.net/2020/09/move-forward/
+#define ML_MOVE(...) static_cast<std::remove_reference_t<decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
+#define ML_FORWARD(...) static_cast<decltype(__VA_ARGS__)&&>(__VA_ARGS__)
 
 /*
  *  namespace utils
