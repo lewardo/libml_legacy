@@ -72,7 +72,7 @@ ml_namespace(internal, types) {
                     return [this] <typename... Ts, template <typename...> class Tup, size_t... I> (const Tup<Ts...>& tup, meta::sequence<I...>) {
                         assert("index out of bounds" && (((size_t) std::get<I>(tup) < _dimensions[I]) && ...));
                         return ( ... + (std::get<I>(tup) * _strides[I]) );
-                    } (std::tuple<Args...>(args...), meta::index_sequence<N>);
+                    } (std::forward_as_tuple(args...), meta::index_sequence<N>);
                 };
 
                 static constexpr arg_type tr_dims(arg_type dims) {
