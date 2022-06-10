@@ -36,44 +36,51 @@ namespace ml::internal::meta {
                 else return make_satisfy_sequence_impl<S, N-1, P, T, Ts...>(sequence<Is...>{});
             }
         }
+
+        template <size_t N, typename... Args>
+        constexpr auto total_equals = sizeof...(Args) == N;
+
+        template <typename T, typename... Args>
+        constexpr auto count_same = ( ... + (std::same_as<T, Args> ? 1 : 0) );
+
+        template <template <typename, typename> class P, typename T, typename... Ts>
+        using all_satisfy = std::conjunction<P<T, Ts>...>;
+
+        template <template <typename, typename> class Pa, typename Ta, template <typename, typename> class Pb, typename Tb, typename... Ts>
+        using all_either = std::conjunction<std::disjunction<Pa<Ta, Ts>, Pb<Tb, Ts>>...>;
+
+        template <typename T, typename... Ts>
+        using all_same = all_satisfy<std::is_same, T, Ts...>;
+
+        template <size_t N>
+        using make_index_sequence = decltype(detail::make_index_sequence_impl<N>());
+
+        template <size_t N>
+        constexpr auto index_sequence = make_index_sequence<N>{};
+
+        template <size_t N, size_t V>
+        using make_repeat_sequence = decltype(detail::make_repeat_sequence_impl<N, V>());
+
+        template <size_t N, size_t V>
+        constexpr auto repeat_sequence = make_repeat_sequence<N, V>{};
+
+        template <size_t L, size_t H>
+        using make_range_sequence = decltype(detail::make_range_sequence_impl<H, L>());
+
+        template <size_t N, size_t V>
+        constexpr auto range_sequence = make_range_sequence<N, V>{};
+
+        template <template <typename, typename> class P, typename T, typename... Ts>
+        using make_satisfy_sequence = decltype(detail::make_satisfy_sequence_impl<sizeof...(Ts), sizeof...(Ts)-1, P, T, Ts...>(sequence {}));
+
+        template <template <typename, typename> class P, typename T, typename... Ts>
+        constexpr auto satisfy_sequence = make_satisfy_sequence<P, T, Ts...>{};
     };
 
-    template <size_t N, typename... Args>
-    constexpr auto count_equals = sizeof...(Args) == N;
-
-    template <template <typename, typename> class P, typename T, typename... Ts>
-    using all_satisfy = std::conjunction<P<T, Ts>...>;
-
-    template <template <typename, typename> class Pa, typename Ta, template <typename, typename> class Pb, typename Tb, typename... Ts>
-    using all_either = std::conjunction<std::disjunction<Pa<Ta, Ts>, Pb<Tb, Ts>>...>;
-
-    template <typename T, typename... Ts>
-    using all_same = all_satisfy<std::is_same, T, Ts...>;
-
-    template <typename T, typename... Args>
-    constexpr auto count_same = ( ... + (std::same_as<T, Args> ? 1 : 0) );
-
-    template <size_t N>
-    using make_index_sequence = decltype(detail::make_index_sequence_impl<N>());
-
-    template <size_t N>
-    constexpr auto index_sequence = make_index_sequence<N>{};
-
-    template <size_t N, size_t V>
-    using make_repeat_sequence = decltype(detail::make_repeat_sequence_impl<N, V>());
-
-    template <size_t N, size_t V>
-    constexpr auto repeat_sequence = make_repeat_sequence<N, V>{};
-
-    template <size_t L, size_t H>
-    using make_range_sequence = decltype(detail::make_range_sequence_impl<H, L>());
-
-    template <size_t N, size_t V>
-    constexpr auto range_sequence = make_range_sequence<N, V>{};
-
-    template <template <typename, typename> class P, typename T, typename... Ts>
-    using make_satisfy_sequence = decltype(detail::make_satisfy_sequence_impl<sizeof...(Ts), sizeof...(Ts)-1, P, T, Ts...>(sequence {}));
-
-    template <template <typename, typename> class P, typename T, typename... Ts>
-    constexpr auto satisfy_sequence = make_satisfy_sequence<P, T, Ts...>{};
+    using detail::total_equals, detail::count_same;
+    using detail::all_satisfy, detail::all_either, detail::all_same;
+    using detail::make_index_sequence, detail::index_sequence;
+    using detail::make_repeat_sequence, detail::repeat_sequence;
+    using detail::make_range_sequence, detail::range_sequence;
+    using detail::make_satisfy_sequence, detail::satisfy_sequence;
 };

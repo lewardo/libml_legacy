@@ -64,7 +64,7 @@ ml_namespace(internal, types) {
                 size_t size() const { return _size; };
 
                 // please forgive me~
-                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::count_equals<N, Args...>
+                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::total_equals<N, Args...>
                 decltype(auto) calculate_offset(Args... args) {
                     // compartimentalised and localised version of a deferring function, templated lambda that accetps index sequence and tuple of forwarded arguments, capturing `this` by reference
                     // asserts that all the arguments are in bound then returns elementwise multiplication with strides over summation fold expression
@@ -172,7 +172,7 @@ ml_namespace(internal, types) {
                 #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
                 template <typename... Args, size_t S = meta::count_same<slice_t, Args...>>
-                requires meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>::value && meta::count_equals<N, Args...>
+                requires meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>::value && meta::total_equals<N, Args...>
                 tensor_slice<T, S> operator ()(Args&&... args) {
                     if constexpr (S == 0)
                         return tensor_slice<T, 0>(_container[_extent.calculate_offset(args...)]);
