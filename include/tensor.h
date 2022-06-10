@@ -64,7 +64,7 @@ ml_namespace(internal, types) {
                 size_t size() const { return _size; };
 
                 // please forgive me~
-                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::count_equals<N, Args...>::value
+                template <typename... Args> requires meta::all_satisfy<std::is_convertible, size_t, Args...>::value && meta::count_equals<N, Args...>
                 decltype(auto) calculate_offset(Args... args) {
                     // compartimentalised and localised version of a deferring function, templated lambda that accetps index sequence and tuple of forwarded arguments, capturing `this` by reference
                     // asserts that all the arguments are in bound then returns elementwise multiplication with strides over summation fold expression
@@ -101,20 +101,23 @@ ml_namespace(internal, types) {
 
                 static constexpr auto rank = extent_type::rank;
 
+                template <typename, size_t>
+                friend class tensor;
+
                 tensor_slice(container_type c, slice_type s)
                 :   _ref(c),
                     _slice(s) {};
 
-                template <typename, size_t>
-                friend class tensor;
+                operator tensor<T, N>() const { return tensor<T, N>(this); };
+                operator container_type() const { return _ref; };
 
                 #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) const { return _ref[_slice].operator op(std::forward<Args&&>(args)...); }
                     FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
             private:
-                container_type _ref;
-                slice_type _slice;
+                const container_type _ref;
+                const slice_type _slice;
 
         };
 
@@ -129,15 +132,15 @@ ml_namespace(internal, types) {
                 tensor_slice(container_type init)
                 :   _ref(init) {};
 
-                operator tensor<T, 0>() { return tensor<T, 0>(_ref); };
-                operator T&() { return _ref; };
+                operator tensor<T, 0>() const { return tensor<T, 0>(_ref); };
+                operator container_type() const { return _ref; };
 
                 #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) void operator op(T arg) const { _ref op arg; }
                     FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
             private:
-                container_type _ref;
+                const container_type _ref;
         };
 
         template <typename T, size_t N> requires valid_valarray<T>
@@ -168,9 +171,10 @@ ml_namespace(internal, types) {
                     FOR_EACH(ML_TENSOR_DEFINE_UNARY_OPERATOR, +, -, ~, !);
                 #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
-                template <typename... Args, size_t S = meta::count_same<slice_t, Args...>::value> requires std::conjunction<meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>, meta::equal<sizeof...(Args), N>>::value
+                template <typename... Args, size_t S = meta::count_same<slice_t, Args...>>
+                requires meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>::value && meta::count_equals<N, Args...>
                 tensor_slice<T, S> operator ()(Args&&... args) {
-                    if constexpr (meta::equal<S, 0>::value)
+                    if constexpr (S == 0)
                         return tensor_slice<T, 0>(_container[_extent.calculate_offset(args...)]);
                     else {
                         size_t offset = _extent.calculate_offset((size_t) args...);
@@ -203,6 +207,7 @@ ml_namespace(internal, types) {
                 :   _value(init) {};
 
                 operator value_type() { return _value; };
+                explicit operator value_type&() { return _value; };
 
                 consteval size_t size() const { return 1; };
                 value_type& value() { return _value; };

@@ -8,18 +8,11 @@ namespace ml::internal::meta {
     struct sequence {};
 
     namespace detail {
-        template <typename T, typename U>
-        static constexpr auto are_same = 0;
-
-        template <typename T>
-        static constexpr auto are_same<T, T> = 1;
-
         template <size_t N, size_t... Is>
         constexpr auto make_index_sequence_impl() {
             if constexpr (N == 0) return sequence<Is...>{};
             else return make_index_sequence_impl<N-1, N-1, Is...>();
         }
-
 
         template <size_t N, size_t V, size_t... Is>
         constexpr auto make_repeat_sequence_impl() {
@@ -46,19 +39,7 @@ namespace ml::internal::meta {
     };
 
     template <size_t N, typename... Args>
-    struct count_equals {
-        static constexpr auto value = sizeof...(Args) == N;
-    };
-
-    template <size_t A, size_t B>
-    struct equal {
-        static constexpr auto value = A == B;
-    };
-
-    template <size_t A, size_t B>
-    struct greater {
-        static constexpr auto value = A > B;
-    };
+    constexpr auto count_equals = sizeof...(Args) == N;
 
     template <template <typename, typename> class P, typename T, typename... Ts>
     using all_satisfy = std::conjunction<P<T, Ts>...>;
@@ -70,9 +51,7 @@ namespace ml::internal::meta {
     using all_same = all_satisfy<std::is_same, T, Ts...>;
 
     template <typename T, typename... Args>
-    struct count_same {
-        static constexpr auto value = (( detail::are_same<T, Args> + ... ));
-    };
+    constexpr auto count_same = ( ... + (std::same_as<T, Args> ? 1 : 0) );
 
     template <size_t N>
     using make_index_sequence = decltype(detail::make_index_sequence_impl<N>());
