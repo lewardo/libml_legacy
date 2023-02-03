@@ -49,7 +49,7 @@ namespace ml::networks {
                  *  network functions
                  */
 
-                virtual flt propagate_values(const input_type&, output_type&) = 0;
+                virtual float_type propagate_values(const input_type&, output_type&) = 0;
                 virtual int calculate_update(const input_type&, output_type&) = 0;
                 virtual int execute_update() = 0;
 
@@ -92,7 +92,7 @@ namespace ml::networks {
              *  function requirements
              */
 
-            { impl.propagate_values(iT, oT) } -> std::same_as<flt>;
+            { impl.propagate_values(iT, oT) } -> std::same_as<float_type>;
             { impl.calculate_update(iT, oT) } -> std::same_as<int>;
             { impl.execute_update() } -> std::same_as<int>;
 
@@ -141,7 +141,7 @@ namespace ml::networks {
                  *  forwarding functions to propagation functions
                  */
 
-                flt propagate_values(const input_type& i, output_type& o) {
+                float_type propagate_values(const input_type& i, output_type& o) {
                     return _impl.propagate_values(i, o);
                 };
 
@@ -182,7 +182,7 @@ namespace ml::networks {
          */
 
         template <class Impl> requires generic_impl<Impl>
-        flt train(base_type<Impl>&);
+        float_type train(base_type<Impl>&);
 
 
         /*
@@ -190,7 +190,7 @@ namespace ml::networks {
          */
 
         template <class Impl> requires generic_impl<Impl>
-        flt predict(base_type<Impl>&);
+        float_type predict(base_type<Impl>&);
 
     }
 

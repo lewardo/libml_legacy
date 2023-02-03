@@ -36,14 +36,14 @@ namespace ml::lossf {
              *  loss function itself
              */
 
-            std::function<flt (flt, flt)> f;
+            std::function<float_type (float_type, float_type)> f;
 
 
             /*
              *  derivative of the loss function
              */
 
-            std::function<flt (flt, flt)> df;
+            std::function<float_type (float_type, float_type)> df;
             
         };
 
@@ -51,7 +51,7 @@ namespace ml::lossf {
          *  Accumulator function to simplify error calculation
          */
 
-        flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f);
+        float_type accumulate(const vector &a, const vector &b, std::function<float_type (float_type, float_type)> &f);
 
 
         /*

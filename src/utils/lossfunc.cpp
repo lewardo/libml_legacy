@@ -15,10 +15,10 @@ namespace ml::lossf::detail {
      */
 
     [[ maybe_unused ]]
-    flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {
+    float_type accumulate(const vector &a, const vector &b, std::function<float_type (float_type, float_type)> &f) {
         if(a.size() != b.size()) throw std::invalid_argument("accumulate vector size mismatch");  // throw if mismatched sizes
 
-        return std::transform_reduce(std::execution::par_unseq, a.begin(), a.end(), b.begin(), (flt) 0, std::plus<flt>(), f);
+        return std::transform_reduce(std::execution::par_unseq, a.begin(), a.end(), b.begin(), (float_type) 0, std::plus<float_type>(), f);
     };
 
 
@@ -27,12 +27,12 @@ namespace ml::lossf::detail {
      */
 
     value_type mse = {
-        [](flt x, flt t) -> flt {
-            flt d = t - x;
+        [](float_type x, float_type t) -> float_type {
+            float_type d = t - x;
             return 0.5f * d * d;
         },
 
-        [](flt x, flt t) -> flt {
+        [](float_type x, float_type t) -> float_type {
             return x - t;
         },
     };
@@ -43,11 +43,11 @@ namespace ml::lossf::detail {
      */
 
     value_type mae = {
-        [](flt x, flt t) -> flt {
+        [](float_type x, float_type t) -> float_type {
             return std::abs(t - x);
         },
 
-        [](flt x, flt t) -> flt {
+        [](float_type x, float_type t) -> float_type {
             if(x < t) return -1.0f;
             else if(x > t) return 1.0f;
 
@@ -61,12 +61,12 @@ namespace ml::lossf::detail {
      */
 
     value_type xee = {
-        [](flt x, flt t) -> flt {
+        [](float_type x, float_type t) -> float_type {
             if(t == 1.0f) return -1.0f * std::log(x);
             return -1.0f * std::log(1.0f - x);
         },
 
-        [](flt x, flt t) -> flt {
+        [](float_type x, float_type t) -> float_type {
             if(t == 1.0f) return -1.0f / x;
             return -1.0f / (1.0f - t);
         },

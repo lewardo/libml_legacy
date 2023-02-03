@@ -9,11 +9,11 @@ namespace ml::actf::detail {
      */
 
     value_type sigmoid = {
-        [](flt x) -> flt {
+        [](float_type x) -> float_type {
             return 1.0f / (1.0f + std::exp(-1.0f * x));
         },
 
-        [](flt x) -> flt {
+        [](float_type x) -> float_type {
             return x * (1.0f - x);
         }
     };
@@ -24,11 +24,11 @@ namespace ml::actf::detail {
      */
 
     value_type tanh = {
-        [] (flt x) -> flt {
+        [] (float_type x) -> float_type {
             return std::tanh(x);
         },
 
-        [] (flt x) -> flt {
+        [] (float_type x) -> float_type {
             return 1.0f - x * x;
         }
     };
@@ -39,12 +39,12 @@ namespace ml::actf::detail {
      */
 
     value_type relu = {
-        [] (flt x) -> flt {
+        [] (float_type x) -> float_type {
             if(x > 0.0f) return x;
             else return 0.0f;
         },
 
-        [] (flt x) -> flt {
+        [] (float_type x) -> float_type {
             if(x > 0.0f) return 1.0f;
             else return 0.0f;
         }
@@ -56,11 +56,11 @@ namespace ml::actf::detail {
      */
 
     value_type linear = {
-        [] (flt x) -> flt {
+        [] (float_type x) -> float_type {
             return x;
         },
 
-        [] (flt) -> flt {
+        [] (float_type) -> float_type {
             return 1.0f;
         }
     };

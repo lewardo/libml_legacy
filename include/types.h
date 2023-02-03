@@ -31,18 +31,18 @@ ml_namespace(internal, types) {
     };
 
     /*
-     *  library-wide decimal precision, for example
+     *  library-wide decimal precision, for example float or double
      */
 
-    using flt = float;
+    using float_type = float;
 
 
     /*
      *  vector and matrix type aliases
      */
 
-    using vector = std::vector<flt>;
-    using matrix = std::vector<std::vector<flt>>;
+    using vector = std::vector<float_type>;
+    using matrix = std::vector<std::vector<float_type>>;
 
 
     using empty_type = std::monostate;

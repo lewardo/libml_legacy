@@ -32,7 +32,7 @@ namespace ml::internal::random {
          *  float-esque atomic generation of random number in range (-1, 1), with once-executing random seed
          */
 
-        template <typename T> requires std::convertible_to<T, flt>
+        template <typename T> requires std::convertible_to<T, float_type>
         void generate(T& value) {
             [[ maybe_unused ]]
             static auto seed = []() {

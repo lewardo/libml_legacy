@@ -33,7 +33,7 @@ namespace ml::networks {
                 mlp_impl();
                 ~mlp_impl() = default;
 
-                flt propagate_values(const input_type&, output_type&) final;
+                float_type propagate_values(const input_type&, output_type&) final;
                 int calculate_update(const input_type&, output_type&) final;
                 int execute_update() final;
 

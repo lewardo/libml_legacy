@@ -35,14 +35,14 @@ namespace ml::actf {
              *  activation function itself
              */
 
-            std::function<flt (flt)> f;
+            std::function<float_type (float_type)> f;
 
 
             /*
              *  derivative of the activation function in terms of the original output
              */
 
-            std::function<flt (flt)> df;
+            std::function<float_type (float_type)> df;
         };
 
 
