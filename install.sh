@@ -13,7 +13,7 @@ then
     git clone https://github.com/lewardo/libml.git $DIR
     
     cd $DIR
-    make install PREFIX=/usr/local
+    PREFIX=/usr/local make install
     
     rm -rf $DIR
 else
