@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <ranges>
 #include <vector>
+#include <numeric>
 #include <valarray>
 #include <tuple>
 
@@ -110,10 +111,10 @@ ml_namespace(internal, types) {
                     _slice(s) {};
 
                 operator tensor<T, N>() const { return tensor<T, N>(this); };
-                operator reference_type() const { return _ref; };
+                operator reference_type() const { return _ref; }; 
 
                 #define ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) { return _ref[_slice].operator op(std::forward<Args&&>(args)...); }
-                #define ML_TENSOR_DEFINE_SCALAR_MEMBER_OPERATOR(op) template <std::constructible_from<T> Arg> decltype(auto) operator op(Arg&& arg) { return _ref[_slice].operator op(std::valarray<T>(T{arg}, 9)); }
+                #define ML_TENSOR_DEFINE_SCALAR_MEMBER_OPERATOR(op) template <std::constructible_from<T> Arg> decltype(auto) operator op(Arg&& arg) { return _ref[_slice].operator op(std::valarray<T>(T{arg}, _slice_length())); }
                     FOR_EACH(ML_TENSOR_DEFINE_SCALAR_MEMBER_OPERATOR, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                     FOR_EACH(ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR
@@ -121,6 +122,14 @@ ml_namespace(internal, types) {
             private:
                 const reference_type _ref;
                 const slice_type _slice;
+
+                int _slice_length() {
+                    int length = 1;
+
+                    std::ranges::for_each(_slice.size(), [&length](auto& x) { length *= x; });
+                    
+                    return length;
+                }
 
         };
 
