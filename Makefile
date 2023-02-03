@@ -114,7 +114,7 @@ rebuild: clean $(EXE)
 
 # build executable and run
 run: $(EXE)
-	$(ECHO) "running \033[4m$^\033[0m:"
+	$(ECHO) "running \033[4m$^\033[0m:\n"
 	$(EXE)
 
 # install libraries to directoies 
@@ -170,7 +170,7 @@ $(BUILDDIR) $(OBJDIR) $(DEPDIR) $(LIBDIR) $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIB
 
 # move the build directory so the target couting works properly
 _move:
-	[ ! -d $(BUILDDIR) ] || mv $(BUILDDIR){,_}
+	[ ! -d $(BUILDDIR) ] || mv $(BUILDDIR) $(BUILDDIR)_
 
 # include source dependecies to recompile when changed
 -include $(DEPDIR)/*.d
