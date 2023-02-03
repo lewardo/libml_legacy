@@ -7,6 +7,7 @@
 #include <functional>
 #include <concepts>
 #include <iterator>
+#include <algorithm>
 #include <ranges>
 #include <vector>
 #include <valarray>
@@ -97,26 +98,28 @@ ml_namespace(internal, types) {
             public:
                 using extent_type       = tensor_extent<N>;
                 using slice_type        = std::gslice;
-                using container_type    = std::add_lvalue_reference_t<std::valarray<T>>;
+                using reference_type    = std::add_lvalue_reference_t<std::valarray<T>>;
 
                 static constexpr auto rank = extent_type::rank;
 
                 template <typename, size_t>
                 friend class tensor;
 
-                tensor_slice(container_type c, slice_type s)
+                tensor_slice(reference_type c, slice_type s)
                 :   _ref(c),
                     _slice(s) {};
 
                 operator tensor<T, N>() const { return tensor<T, N>(this); };
-                operator container_type() const { return _ref; };
+                operator reference_type() const { return _ref; };
 
-                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) const { return _ref[_slice].operator op(std::forward<Args&&>(args)...); }
-                    FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
-                #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
+                #define ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR(op) template <typename... Args> decltype(auto) operator op(Args&&... args) { return _ref[_slice].operator op(std::forward<Args&&>(args)...); }
+                #define ML_TENSOR_DEFINE_SCALAR_MEMBER_OPERATOR(op) template <std::constructible_from<T> Arg> decltype(auto) operator op(Arg&& arg) { return _ref[_slice].operator op(std::valarray<T>(T{arg}, 9)); }
+                    FOR_EACH(ML_TENSOR_DEFINE_SCALAR_MEMBER_OPERATOR, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
+                    FOR_EACH(ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
+                #undef ML_TENSOR_DEFINE_GENERIC_MEMBER_OPERATOR
 
             private:
-                const container_type _ref;
+                const reference_type _ref;
                 const slice_type _slice;
 
         };
@@ -125,22 +128,22 @@ ml_namespace(internal, types) {
         class tensor_slice<T, 0> {
             public:
                 using extent_type       = tensor_extent<0>;
-                using container_type    = std::add_lvalue_reference_t<T>;
+                using reference_type    = std::add_lvalue_reference_t<T>;
 
                 static constexpr auto rank = extent_type::rank;
 
-                tensor_slice(container_type init)
+                tensor_slice(reference_type init)
                 :   _ref(init) {};
 
                 operator tensor<T, 0>() const { return tensor<T, 0>(_ref); };
-                operator container_type() const { return _ref; };
+                operator reference_type() const { return _ref; };
 
-                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) void operator op(T arg) const { _ref op arg; }
+                #define ML_TENSOR_DEFINE_MEMBER_OPERATOR(op) void operator op(std::convertible_to<T> auto arg) const { _ref op arg; }
                     FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                 #undef ML_TENSOR_DEFINE_MEMBER_OPERATOR
 
             private:
-                const container_type _ref;
+                const reference_type _ref;
         };
 
         template <typename T, size_t N> requires valid_valarray<T>
@@ -169,7 +172,9 @@ ml_namespace(internal, types) {
                 #define ML_TENSOR_DEFINE_UNARY_OPERATOR(op) decltype(auto) operator op() { _container.operator op(); }
                     FOR_EACH(ML_TENSOR_DEFINE_MEMBER_OPERATOR, =, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=);
                     FOR_EACH(ML_TENSOR_DEFINE_UNARY_OPERATOR, +, -, ~, !);
-                #undef  ML_TENSOR_DEFINE_MEMBER_OPERATOR
+                #undef ML_TENSOR_DEFINE_MEMBER_OPERATOR
+                #undef ML_TENSOR_DEFINE_UNARY_OPERATOR
+
 
                 template <typename... Args, size_t S = meta::count_same<slice_t, Args...>>
                 requires meta::all_either<std::is_same, slice_t, std::is_convertible, index_t, Args...>::value && meta::total_equals<N, Args...>
@@ -178,10 +183,10 @@ ml_namespace(internal, types) {
                         return tensor_slice<T, 0>(_container[_extent.calculate_offset(args...)]);
                     else {
                         size_t offset = _extent.calculate_offset((size_t) args...);
-
                         std::valarray<size_t> dims = utils::extract_indicies(_extent.dimensions(), meta::satisfy_sequence<std::is_same, slice_t, Args...>);
                         std::valarray<size_t> strd = utils::extract_indicies(_extent.strides(),    meta::satisfy_sequence<std::is_same, slice_t, Args...>);
 
+                        // TODO: pass in real size of slice to save memory
                         return tensor_slice<T, S>(_container, std::gslice(offset, dims, strd));
                     }
                 };
