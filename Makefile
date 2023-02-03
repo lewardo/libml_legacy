@@ -34,7 +34,7 @@ IINCDIR			?= $(PREFIX)/include
 # name of built development executable
 EXE				:= $(BUILDDIR)/main
 # library header, tries to find {{foldername}}.h, otherwise picks first top-level header
-LIBHDR			:= $(notdir $(shell find . -depth 1 -name $(notdir $(CURDIR)).h | grep . || find . -depth 1 -name '*.h' | head -n 1))
+LIBHDR			:= $(notdir $(shell find . -maxdepth 1 -name $(notdir $(CURDIR)).h | grep . || find . -maxdepth 1 -name '*.h' | head -n 1))
 # enclosing folder name for library name
 LIBNAME			?= $(notdir $(CURDIR))
 
