@@ -23,7 +23,7 @@
  *  namespace utils
  */
 
-namespace ml::internal::utils {
+ml_namespace(internal, utils) {
 
     /*
      *  detail namespace as to not import other namespaces to `namespace utils` directly

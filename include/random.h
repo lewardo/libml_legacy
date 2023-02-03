@@ -13,7 +13,7 @@
 
 static constexpr double RAND_COEFF = RAND_MAX / 2;
 
-namespace ml::internal::random {
+ml_namespace(internal, random) {
 
     /*
      *  detail namespace as to not import other namespaces to `namespace network` directly
