@@ -6,7 +6,6 @@
 #include <functional>
 #include <execution>
 
-#include "float_type"
 #include "types.h"
 
 /*
