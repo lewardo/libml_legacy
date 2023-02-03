@@ -13,10 +13,10 @@ namespace ml::networks::detail {
     mlp_impl::mlp_impl() {
         std::printf("constructing mlp impl\n");
     }
-    
-    flt mlp_impl::propagate_values(const vector& a, vector& b) {
+
+    float_type mlp_impl::propagate_values(const vector& a, vector& b) {
         std::printf("propagate_values, %ld %ld\n", a.size(), b.size());
-        
+
         return default_value<float>::value;
     };
 
