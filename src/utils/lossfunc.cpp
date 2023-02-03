@@ -15,10 +15,10 @@ namespace ml::lossf::detail {
      */
 
     [[ maybe_unused ]]
-    flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {        
+    flt accumulate(const vector &a, const vector &b, std::function<flt (flt, flt)> &f) {
         if(a.size() != b.size()) throw std::invalid_argument("accumulate vector size mismatch");  // throw if mismatched sizes
 
-        return std::transform_reduce(std::execution::par_unseq, a.begin(), a.end(), b.begin(), 0.0f, std::plus<flt>(), f);
+        return std::transform_reduce(std::execution::par_unseq, a.begin(), a.end(), b.begin(), (flt) 0, std::plus<flt>(), f);
     };
 
 
