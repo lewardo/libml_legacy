@@ -127,7 +127,7 @@ ml_namespace(internal, types) {
                     int length = 1;
 
                     std::ranges::for_each(_slice.size(), [&length](auto& x) { length *= x; });
-                    
+
                     return length;
                 }
 
@@ -230,4 +230,6 @@ ml_namespace(internal, types) {
                 value_type _value = utils::default_value<value_type>::value;
         };
     };
+
+    using detail::tensor, detail::tensor_slice;
 };
