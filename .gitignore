@@ -1,6 +1,5 @@
 .DS_Store
-.vscode/**
-build
-build/**
+.vscode/
+build/
 spec.md
 test.*
