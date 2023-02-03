@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <numeric>
 
-#include "algeb.h"
 #include "lossfunc.h"
 
 namespace ml::lossf::detail {
