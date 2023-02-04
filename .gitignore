@@ -2,4 +2,4 @@
 .vscode/
 build/
 spec.md
-test.*
+main.cpp
