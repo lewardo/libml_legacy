@@ -77,8 +77,8 @@ namespace ml::networks {
          *  concept that checks whether an implementation is compatible
          */
 
-        template <class Impl>
-        concept generic_impl = std::derived_from<Impl, base_impl<typename Impl::input_type, typename Impl::output_type>> || requires (Impl impl, Impl::input_type iT, Impl::output_type oT, std::string s) {
+        template <class Impl, typename iT = Impl::input_type, typename oT = Impl::output_type>
+        concept generic_impl = requires (Impl impl, iT i, oT o, std::string s) {
 
             /*
              *  type requirements
@@ -92,12 +92,12 @@ namespace ml::networks {
              *  function requirements
              */
 
-            { impl.propagate_values(iT, oT) } -> std::same_as<float_type>;
-            { impl.calculate_update(iT, oT) } -> std::same_as<int>;
-            { impl.execute_update() } -> std::same_as<int>;
+            impl.propagate_values(i, o);
+            impl.calculate_update(i, o);
+            impl.execute_update();
 
-            { impl.load_parameters(s) } -> std::same_as<int>;
-            { impl.save_parameters(s) } -> std::same_as<int>;
+            impl.load_parameters(s);
+            impl.save_parameters(s);
 
         };
 
@@ -125,16 +125,7 @@ namespace ml::networks {
 
                 template <typename... Args>
                 base_type(Args&&... args)
-                    : _impl(*new Impl(std::forward<Args>(args)...)) {};
-
-
-                /*
-                 *  defined destructor no save from memory leak
-                 */
-
-                ~base_type() {
-                    delete& _impl;
-                }
+                    : _impl(std::make_unique<Impl>(std::forward<Args>(args)...)) {};
 
 
                 /*
@@ -142,15 +133,15 @@ namespace ml::networks {
                  */
 
                 float_type propagate_values(const input_type& i, output_type& o) {
-                    return _impl.propagate_values(i, o);
+                    return _impl->propagate_values(i, o);
                 };
 
                 int calculate_update(const input_type& i, output_type& o) {
-                    return _impl.calculate_update(i, o);
+                    return _impl->calculate_update(i, o);
                 };
 
                 int execute_update() {
-                    return _impl.execute_update();
+                    return _impl->execute_update();
                 };
 
 
@@ -159,11 +150,11 @@ namespace ml::networks {
                  */
 
                 int load_parameters(const std::string& s) {
-                    return _impl.load_parameters(s);
+                    return _impl->load_parameters(s);
                 };
 
                 int save_parameters(const std::string& s) const {
-                    return _impl.save_parameters(s);
+                    return _impl->save_parameters(s);
                 };
 
             private:
@@ -172,7 +163,7 @@ namespace ml::networks {
                  *  reference to internal implementation
                  */
 
-                Impl& _impl;
+                std::unique_ptr<Impl> _impl;
 
         };
 

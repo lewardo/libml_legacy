@@ -28,17 +28,20 @@ namespace ml::networks {
          *  internal implementation of mlp
          */
 
-        class mlp_impl : public base_impl<vector, vector> {
+        class mlp_impl {
             public:
+                using input_type = vector;
+                using output_type = vector;
+
                 mlp_impl();
                 ~mlp_impl() = default;
 
-                float_type propagate_values(const input_type&, output_type&) final;
-                int calculate_update(const input_type&, output_type&) final;
-                int execute_update() final;
+                float_type propagate_values(const input_type&, output_type&);
+                int calculate_update(const input_type&, output_type&);
+                int execute_update();
 
-                int load_parameters(const std::string) final;
-                int save_parameters(const std::string) const final;
+                int load_parameters(const std::string);
+                int save_parameters(const std::string) const;
 
         };
 
