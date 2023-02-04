@@ -23,57 +23,6 @@ namespace ml::networks {
 
 
         /*
-         *  implementation abstract class that defines the ABI for network implementation classes, or can just use a free class that adheres to `concept generic_impl`
-         */
-
-        template <typename iT, typename oT>
-        class base_impl {
-            public:
-
-                /*
-                 *  pubilc using type alias
-                 */
-
-                using input_type = iT;
-                using output_type = oT;
-
-
-                /*
-                 *  virtual destructor to allow stack delete of descendants
-                 */
-
-                virtual ~base_impl() = default;
-
-
-                /*
-                 *  network functions
-                 */
-
-                virtual float_type propagate_values(const input_type&, output_type&) = 0;
-                virtual int calculate_update(const input_type&, output_type&) = 0;
-                virtual int execute_update() = 0;
-
-
-                /*
-                 *  network saving and loading
-                 */
-
-                virtual int load_parameters(const std::string) = 0;
-                virtual int save_parameters(const std::string) const = 0;
-
-
-            protected:
-
-                /*
-                 *  private global variable that can be used for empty constructor+load process
-                 */
-
-                bool _initialised = false;
-
-        };
-
-
-        /*
          *  concept that checks whether an implementation is compatible
          */
 

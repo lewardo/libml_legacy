@@ -7,8 +7,6 @@
 #include "network.h"
 
 
-using namespace ml::internal::types;
-
 namespace ml::networks {
 
     /*
@@ -42,6 +40,10 @@ namespace ml::networks {
 
                 int load_parameters(const std::string);
                 int save_parameters(const std::string) const;
+            
+            private:
+
+                bool _initialised = false;
 
         };
 
