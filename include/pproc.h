@@ -37,4 +37,4 @@
 #define ml_namespace(...) namespace ml QUALIFIED(__VA_ARGS__)
 
 #define USING_DECL(NS) using namespace ::ml::NS;
-#define ml_using(...) FOR_EACH(USING_DECL, __VA_ARGS__)
+#define ml_using(...) using namespace ::ml; FOR_EACH(USING_DECL, __VA_ARGS__)
