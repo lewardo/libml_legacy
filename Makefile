@@ -7,7 +7,7 @@
 
 ### compiler/linker and archiver ###
 # compiler/linker
-CXX				:= g++-11
+CXX				:= clang++
 # archiver
 AR				:= ar
 
@@ -54,7 +54,7 @@ export CPATH	:= $(INCDIR)
 
 ### command line parameters to change behaviour ###
 # c++ version
-STD 			?= c++2a
+STD 			?= c++20
 # optimisation level
 OPTIMISE		?= 0
 # printing style
@@ -62,7 +62,7 @@ MULTILINE 		?= 1
 
 ### compiler/linker flags ###
 # compiler flags, with options
-CXXFLAGS 		+= -std=$(STD) -Wall -Wextra -Werror -O$(OPTIMISE)
+CXXFLAGS 		+= -std=$(STD) -Wall -Wextra -O$(OPTIMISE)
 # linker flags, link libmath
 LDFLAGS  		+= -lm
 
