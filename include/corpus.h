@@ -128,7 +128,7 @@ namespace ml::corpora {
                     return _impl.corpus_size();
                 };
 
-                Impl::value_type operator[](const int& i) {
+                typename Impl::value_type operator[](const int& i) {
                     return _impl.get_element(i);
                 };
 

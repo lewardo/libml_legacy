@@ -58,7 +58,7 @@ ml_namespace(internal, utils) {
         };
 
         template <typename T>
-        using default_value_v = default_value<T>::value;
+        using default_value_v = typename default_value<T>::value;
 
 
         template <typename R, typename T, size_t... Is>

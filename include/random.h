@@ -53,7 +53,7 @@ ml_namespace(internal, random) {
             std::for_each(
                 std::execution::par_unseq,
                 container.begin(), container.end(),
-                [&] (T::value_type& i) {
+                [&] (typename T::value_type& i) {
                     generate(i);
                 }
             );
