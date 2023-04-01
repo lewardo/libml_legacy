@@ -121,6 +121,7 @@ run: $(EXE)
 install: $(LIBNAME).a $(LIBNAME).so $(HDRS) | $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME)
 	$(ECHO) "installing to $(ILIBDIR) and $(IINCDIR)"
 	sudo mv $(LIBDIR)/$(LIBNAME).{a,so} $(ILIBDIR)
+	sudo chown root $(ILIBDIR)/$(LIBNAME).{a,so}
 	
 	sudo cp $(LIBHDR) $(IINCDIR)
 	sudo cp $(HDRS) $(IINCDIR)/$(LIBNAME)
@@ -165,8 +166,11 @@ $(LIBNAME).so: $(OBJS) | $(LIBDIR)
 	$(CXX) -shared -o $(LIBDIR)/$@ $^
 
 # directory creation
-$(BUILDDIR) $(OBJDIR) $(DEPDIR) $(LIBDIR) $(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME):
+$(BUILDDIR) $(OBJDIR) $(DEPDIR) $(LIBDIR):
 	mkdir -p $@
+
+$(ILIBDIR) $(IINCDIR) $(IINCDIR)/$(LIBNAME):
+	sudo mkdir -p $@
 
 # move the build directory so the target couting works properly
 _move:
