@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <concepts>
 #include <type_traits>
 
