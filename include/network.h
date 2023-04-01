@@ -7,6 +7,7 @@
 
 #include "types.h"
 
+
 namespace ml::networks {
 
     /*
@@ -26,8 +27,8 @@ namespace ml::networks {
          *  concept that checks whether an implementation is compatible
          */
 
-        template <class Impl, typename iT = Impl::input_type, typename oT = Impl::output_type>
-        concept generic_impl = requires (Impl impl, iT i, oT o, std::string s) {
+        template <class Impl>
+        concept generic_impl = requires (Impl impl, typename Impl::input_type i, typename Impl::output_type& o, std::string s) {
 
             /*
              *  type requirements
@@ -41,12 +42,12 @@ namespace ml::networks {
              *  function requirements
              */
 
-            impl.propagate_values(i, o);
-            impl.calculate_update(i, o);
-            impl.execute_update();
+            { impl.propagate_values(i, o) } -> std::convertible_to<float_type>;
+            { impl.calculate_update(i, o) } -> std::same_as<int>;
+            { impl.execute_update() } -> std::same_as<int>;
 
-            impl.load_parameters(s);
-            impl.save_parameters(s);
+            { impl.load_parameters(s) } -> std::same_as<int>;
+            { impl.save_parameters(s) } -> std::same_as<int>;
 
         };
 
@@ -56,14 +57,15 @@ namespace ml::networks {
          */
 
         template <class Impl> requires generic_impl<Impl>
-        class base_type {
+        class network {
 
             /*
              *  using type alias
              */
 
-            using input_type = Impl::input_type;
-            using output_type = Impl::output_type;
+            using input_type = typename Impl::input_type;
+            using output_type = typename Impl::output_type;
+            using float_type = typename internal::types::float_type;
 
 
             public:
@@ -73,7 +75,7 @@ namespace ml::networks {
                  */
 
                 template <typename... Args>
-                base_type(Args&&... args)
+                network(Args&&... args)
                     : _impl(std::make_unique<Impl>(std::forward<Args>(args)...)) {};
 
 
@@ -115,14 +117,12 @@ namespace ml::networks {
                 std::unique_ptr<Impl> _impl;
 
         };
-
-
         /*
          *  function to train network on corpus
          */
 
         template <class Impl> requires generic_impl<Impl>
-        float_type train(base_type<Impl>&);
+        float_type train(network<Impl>&);
 
 
         /*
@@ -130,7 +130,7 @@ namespace ml::networks {
          */
 
         template <class Impl> requires generic_impl<Impl>
-        float_type predict(base_type<Impl>&);
+        float_type predict(network<Impl>&);
 
     }
 
@@ -151,10 +151,9 @@ namespace ml::networks {
 namespace ml {
 
     /*
-     *  type alias to use any network type with umbrella term
+     *  export network template class to outer namespace
      */
-
-    template <class Impl>
-    using network = networks::detail::base_type<Impl>;
+  
+    using networks::detail::network;
 
 };
