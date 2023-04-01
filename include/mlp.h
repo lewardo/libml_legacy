@@ -52,7 +52,7 @@ namespace ml::networks {
          *  using type aliases
          */
 
-        using mlp = base_type<mlp_impl>;
+        using mlp = network<mlp_impl>;
 
     };
 
